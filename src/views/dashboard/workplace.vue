@@ -176,16 +176,40 @@ export default {
     getData () {
       this.loading = true
       this.$api.GET_DASHBOARD().then(res => {
-        console.log('TCL: getData -> res', res)
-        this.loading = false
         this.$nextTick(() => {
           this.dataTriangle = Object.freeze(res.data.dataTriangle)
           this.dataPie = Object.freeze(res.data.dataPie)
           this.transform = Object.freeze(res.data.transform)
           this.dataBar = Object.freeze(res.data.dataBar)
         })
+      }).catch(() => {
+        // 接口异常（原 easy-mock 服务已停服）时用兜底数据渲染，保证页面可用
+        this.transform = {
+          type: 'fold',
+          fields: ['本月', '上月'],
+          key: 'name',
+          value: 'value'
+        }
+        this.dataBar = [
+          { 城市: '北京', 本月: 32, 上月: 24 },
+          { 城市: '上海', 本月: 45, 上月: 31 },
+          { 城市: '广州', 本月: 28, 上月: 35 },
+          { 城市: '深圳', 本月: 38, 上月: 29 }
+        ]
+        this.dataPie = [
+          { type: '线上', value: 42 },
+          { type: '门店', value: 31 },
+          { type: '代理', value: 27 }
+        ]
+        this.dataTriangle = [
+          { type: '华北', value: 46 },
+          { type: '华东', value: 38 },
+          { type: '华南', value: 34 },
+          { type: '西部', value: 22 }
+        ]
       }).finally(() => {
-
+        // 必须放在 finally：否则接口失败时 loading 永远为 true，页面会一直转圈
+        this.loading = false
       })
     }
   }

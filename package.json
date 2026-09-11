@@ -29,6 +29,7 @@
 		"apexcharts": "^3.8.3",
 		"axios": "^0.18.1",
 		"china-city-data": "^1.0.1",
+		"clipboard": "^2.0.11",
 		"consola": "^2.10.1",
 		"core-js": "^2.6.5",
 		"deepmerge": "^3.2.0",

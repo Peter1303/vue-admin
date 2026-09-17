@@ -102,6 +102,13 @@ const option = reactive({
     background: rgba(222, 221, 221, 0.7);
     border-radius: 50%;
     border: 1px solid rgba(0, 0, 0, 0.2);
+
+    // 浮在头像图上的小圆钮：浅色下是浅灰半透明，深色下同一块就变成扎眼的亮斑。
+    // 深色改用「半透明黑 + 白色描边」，压在任意头像上都能看清，浅色取值一字未动。
+    html[data-theme='dark'] & {
+      background: rgba(0, 0, 0, 0.45);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
   }
 
   .mask {

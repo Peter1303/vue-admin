@@ -76,6 +76,11 @@ function focus() {
     margin-left: -1px;
     position: relative;
 
+    // 验证码格子：深色下 #ddd 的格线在一排深底上会连成一条亮带；浅色保持原值
+    html[data-theme='dark'] & {
+      border-color: var(--border-color-base, #ddd);
+    }
+
     &.active {
       &::after {
         content: '';

@@ -260,6 +260,11 @@ function closeRadio(eq: any, val: any) {
       min-width: 100px;
       border-right: 1px solid #eee;
 
+      // 同上：深色下换成令牌里的分隔线色
+      html[data-theme='dark'] & {
+        border-right-color: var(--border-color-split, #eee);
+      }
+
       .checkbox-badge {
         transform: scale(0.8);
         vertical-align: text-top;

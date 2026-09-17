@@ -225,8 +225,48 @@ function onSearch() {
   }
 }
 </style>
-<style>
+<style lang="less">
+@import "@/assets/styles/var.less";
+
 .vjs-tree .vjs-value__string {
   word-break: break-all;
+}
+
+/*
+ * vue-json-pretty 深色适配
+ * ------------------------------------------------------------
+ * 它自带的 styles.css 是浅色主题，深色模式下会露出几处固定的浅色：
+ *   · `.vjs-tree-node:hover` / `.is-highlight` / `.vjs-tree-node-actions` → 固定 #e6f7ff 浅蓝
+ *   · 层级虚线 `.vjs-indent-unit.has-line` → #bfcbd9
+ *   · 勾选框 `.vjs-check-controller-inner` → #fff
+ *   · 三处 hover 文字色 → 固定 #1890ff（不跟主题色）
+ * 库内置了 `.vjs-tree-node.dark` 的规则，但要使用者自己挂类名；这里不依赖它，
+ * 直接按令牌覆盖，顺带让 hover 高亮跟随主题色。
+ *
+ * ⚠️ 必须写在**非 scoped** 的 <style> 里：.vjs-* 是 vue-json-pretty 内部的元素，
+ *    带 scoped 的父组件属性只落在它自己的根节点上，后代选择器编译成
+ *    `.vjs-tree-node[data-v-x]` 会一条都匹配不到（典型的「改了但没生效」）。
+ */
+html[data-theme='dark'] .vjs-tree {
+  .vjs-tree-node:hover,
+  .vjs-tree-node.is-highlight,
+  .vjs-tree-node .vjs-tree-node-actions {
+    background-color: color-mix(in srgb, var(--primary-color, @primary-color) 22%, transparent);
+  }
+
+  .vjs-indent-unit.has-line {
+    border-left-color: var(--border-color-split, #bfcbd9);
+  }
+
+  .vjs-check-controller .vjs-check-controller-inner {
+    background-color: var(--component-background, #fff);
+    border-color: var(--border-color-base, #bfcbd9);
+  }
+
+  .vjs-tree-brackets:hover,
+  .vjs-carets:hover,
+  .vjs-tree-node .vjs-tree-node-actions .vjs-tree-node-actions-item:hover {
+    color: var(--primary-color, @primary-color);
+  }
 }
 </style>

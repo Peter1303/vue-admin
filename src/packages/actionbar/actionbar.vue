@@ -20,8 +20,15 @@ defineOptions({name: 'v-actionbar'})
 <style lang="less">
 @import "@/assets/styles/var.less";
 
+/*
+ * ⚠️ 这里**不能**写 `fade(@component-background, 90%)`。
+ *    less 的 fade() 在**构建期**求值 ⇒ 编译成死的 `rgba(255,255,255,.9)`，
+ *    深色模式下这就是一条糊在页面顶部的白色横条（handler-over / 接口管理页最明显）。
+ *    改走运行时令牌 + color-mix，浅色下取值与原来完全相同（仍是 90% 白，观感零变化），
+ *    深色下自动变成 90% 的 #141414。
+ */
 .action-box {
-  background: fade(@component-background, 90%);
+  background: color-mix(in srgb, var(--component-background, @component-background) 90%, transparent);
   padding: 10px;
   box-shadow: 0 4px 3px -3px rgba(10, 10, 10, 0.1);
   position: relative;
@@ -32,7 +39,7 @@ defineOptions({name: 'v-actionbar'})
 }
 
 .action-box2 {
-  background: fade(@component-background, 90%);
+  background: color-mix(in srgb, var(--component-background, @component-background) 90%, transparent);
   box-shadow: 0 4px 3px -3px rgba(10, 10, 10, 0.1);
   height: 56px;
   width: 100%;

@@ -43,6 +43,27 @@
     <v-button class="hidden-xs-only" tip="锁屏" @click="router.push('/lock')">
       <a-iconfont type="icon-lock"/>
     </v-button>
+    <a-dropdown placement="bottomRight" trigger="click">
+      <v-button class="hidden-xs-only" :tip="themeTip">
+        <a-icon :type="themeIcon"/>
+      </v-button>
+      <template #overlay>
+        <a-menu :selected-keys="[layout.themeMode]" @click="handleMenuClick">
+          <a-menu-item key="light">
+            <a-icon type="bulb"/>
+            <span>浅色</span>
+          </a-menu-item>
+          <a-menu-item key="dark">
+            <a-icon type="skin"/>
+            <span>深色</span>
+          </a-menu-item>
+          <a-menu-item key="auto">
+            <a-icon type="desktop"/>
+            <span>自动（跟随系统）</span>
+          </a-menu-item>
+        </a-menu>
+      </template>
+    </a-dropdown>
 
     <!--
       移动端「更多」：把上面 3 个低频功能收进 popover（与右上角头像下拉同一套交互）。
@@ -56,7 +77,7 @@
         <a-icon type="more"/>
       </v-button>
       <template #overlay>
-        <a-menu>
+        <a-menu :selected-keys="[layout.themeMode]" @click="handleMenuClick">
           <a-menu-item key="todo" @click="router.push('/todo')">
             <a-iconfont type="icon-time"/>
             <span>代办事项</span>
@@ -68,6 +89,19 @@
           <a-menu-item key="lock" @click="router.push('/lock')">
             <a-iconfont type="icon-lock"/>
             <span>锁屏</span>
+          </a-menu-item>
+          <a-menu-divider/>
+          <a-menu-item key="light">
+            <a-icon type="bulb"/>
+            <span>浅色</span>
+          </a-menu-item>
+          <a-menu-item key="dark">
+            <a-icon type="skin"/>
+            <span>深色</span>
+          </a-menu-item>
+          <a-menu-item key="auto">
+            <a-icon type="desktop"/>
+            <span>自动（跟随系统）</span>
           </a-menu-item>
         </a-menu>
       </template>
@@ -111,12 +145,50 @@
 </template>
 
 <script lang="ts" setup>
-import {ref} from 'vue'
+import {computed, ref} from 'vue'
 import {useRouter} from 'vue-router'
 import {message} from 'ant-design-vue'
+import {layout, resolvedTheme, setThemeMode} from '@layouts'
+import type {ThemeMode} from '@layouts'
 
 const router = useRouter()
 const screen = ref(false)
+
+/*
+ * 主题模式快捷开关（桌面平铺一个下拉，移动端收进上面那个「更多」菜单）
+ * ------------------------------------------------------------
+ * · 数值来源只有一个：layouts/observable/layout.ts 的 layout.themeMode。
+ *   这里既不做本地副本、也不缓存 —— 所以本组件和右侧悬浮的「布局设置」抽屉
+ *   天然同源同步，两处来回点不会各说各话。
+ * · 三项菜单的 :selected-keys 直接用 themeMode，'light'/'dark'/'auto' 正好是
+ *   合法 key；「更多」菜单里混着 todo/screen/lock，它们不在这个集合里所以不受影响。
+ * · 写值统一走 setThemeMode()（内部有白名单校验），不直接改 layout.themeMode。
+ */
+const THEME_KEYS = ['light', 'dark', 'auto']
+
+/** 图标随模式变：深色用「皮肤」、浅色用「灯泡」、自动用「桌面」 */
+const themeIcon = computed(() => {
+  if (layout.themeMode === 'auto') return 'desktop'
+  return layout.themeMode === 'dark' ? 'skin' : 'bulb'
+})
+
+/** 悬浮提示里带上「自动模式下当前实际生效的是深还是浅」，免得用户以为按钮没反应 */
+const themeTip = computed(() => {
+  const effective = resolvedTheme.value === 'dark' ? '深色' : '浅色'
+  return layout.themeMode === 'auto' ? `主题：自动（当前${effective}）` : `主题：${effective}`
+})
+
+/**
+ * 菜单点击统一入口。
+ * 只认主题三个 key，其余（todo / screen / lock）直接忽略 ——
+ * 那几个项各自还挂着自己的 @click，不会被这里重复触发。
+ */
+function handleMenuClick(e: { key: string | number }) {
+  const key = String(e.key)
+  if (THEME_KEYS.includes(key)) {
+    setThemeMode(key as ThemeMode)
+  }
+}
 
 function toggleScreen() {
   if (!screen.value) {

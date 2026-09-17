@@ -202,6 +202,11 @@ function handleSubmit(e?: Event) {
   font-weight: normal;
   letter-spacing: 0.05em;
   border-bottom: 1px solid #eee;
+
+  // 深色下 #eee 是一条刺眼的亮线；浅色保持原值
+  html[data-theme='dark'] & {
+    border-bottom-color: var(--border-color-split, #eee);
+  }
 }
 
 #todolist h1 span {

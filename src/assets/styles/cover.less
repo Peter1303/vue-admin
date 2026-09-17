@@ -206,3 +206,31 @@
     border-left-color: var(--primary-color, @primary-color) !important;
   }
 }
+
+/* ============================================================
+ * apexcharts 深色适配
+ * ------------------------------------------------------------
+ * apexcharts 自带样式是浅色的：`.apexcharts-menu` 是白底 + 深色边框，
+ * `.apexcharts-menu-item:hover` 是 #eee。深色模式下点开图表右上角的导出菜单，
+ * 拿到的是「白底白字」—— 文字继承了 body 的 rgba(255,255,255,.85)，背景却还是 #fff，
+ * 实测对比度 1.0（/workplace 页）。
+ *
+ * 它内置了 `.apexcharts-theme-dark .apexcharts-menu`，但那是给 `theme.mode = 'dark'`
+ * 的实例用的；本项目图表用的是默认 light 主题。改 theme 要动每一个图表配置，
+ * 而这里真正要修的只是「浮层配色」，用 CSS 覆盖更集中、风险更小。
+ *
+ * ⚠️ 这个菜单默认 `opacity: 0`（要点开 toolbar 才加 `.apexcharts-menu-open`），
+ *    静态扫 DOM 时会因为父元素透明而被过滤掉 —— 属于「不点开就发现不了」的一类，
+ *    探针里必须真的点一次工具栏。
+ * ============================================================ */
+html[data-theme='dark'] {
+  .apexcharts-menu {
+    background: var(--popover-background, #fff);
+    border-color: var(--border-color-base, #ddd);
+    color: var(--text-color, #000);
+  }
+
+  .apexcharts-theme-light .apexcharts-menu-item:hover {
+    background: var(--hover-fill, #eee);
+  }
+}

@@ -212,4 +212,60 @@ function colorWeakChange(colorWeak: boolean) {
   line-height: 25px;
   overflow: hidden;
 }
+
+/*
+ * 移动端：把右侧竖排悬浮组改为「左下角横排」。
+ *
+ * 为什么必须挪位置：桌面内容区左右各留 24px，卡片右边缘在 342px，而这个悬浮组
+ * 固定在 right: 0、宽 40px（占 350~390），恰好落在卡片右侧的留白里、不遮内容。
+ * 但移动端内容区留白收窄到 12px 后卡片右边缘变成 378px，就被它压住 28px。
+ *
+ * ⚠️ 这段媒体查询必须写在**本组件自己的 <style> 里**，不能写到 assets/styles/mobile.less：
+ *    组件样式由 Vite 运行时注入，略晚于全局样式，两者权重相同 ⇒ 只有「组件没写过的属性」
+ *    才会被全局规则加上。踩过的坑：全局写了 `top:auto; right:auto; bottom; left`，
+ *    结果 top/right 被组件样式赢走、bottom/left 却生效，四个方向同时存在 ⇒
+ *    这个框被撑成 370×494 的大块，直接盖住整页下半部分（/calendar 当时就被盖成一片空白）。
+ *
+ * ⚠️ 另外注意别只写 `top: auto` —— 必须同时把 `right` 也置回 `auto`，
+ *    否则 left(12px) + right(0) 会把这个卡片横向拉伸。
+ */
+@media only screen and (max-width: 767px) {
+  .artiely-more-group .artiely-more-group-btn {
+    top: auto;
+    right: auto;
+    bottom: 12px;
+    left: 12px;
+    border-radius: 4px;
+    /*
+     * 固定悬浮元素在窄屏上必然压住一点内容，只能把代价压小：
+     * 缩到 32×96（原位是 40×110），并降低存在感，按下时恢复不透明。
+     */
+    opacity: 0.8;
+    transition: opacity 0.2s;
+
+    &:active {
+      opacity: 1;
+    }
+
+    /*
+     * ⚠️ 三个 `.item` 是 `.ant-card-body` 的子元素，**不是卡片本身的子元素**
+     *    （a-card 会渲染成 .ant-card > .ant-card-body > .item）。
+     *    卡片上原本那句 `display: flex; flex-direction: column` 其实只作用于
+     *    它唯一的子元素 .ant-card-body，所以从来就没排过版 —— 在卡片上改
+     *    `flex-direction: row` 同样不会有任何效果（实测确认：宽高仍是 40×110）。
+     *    真正要横排，得把 flex 设在 .ant-card-body 上。
+     */
+    .ant-card-body {
+      display: flex;
+      flex-direction: row;
+    }
+
+    .item {
+      width: 26px;
+      height: 26px;
+      margin: 3px;
+      line-height: 26px;
+    }
+  }
+}
 </style>

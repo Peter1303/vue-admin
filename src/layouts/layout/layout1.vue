@@ -178,5 +178,22 @@ onUnmounted(() => {
       border-radius: 4px;
     }
   }
+
+  /*
+   * 移动端：桌面版的 `padding: 0 24px` 在 390px 视口下白占了 48px 顶栏宽度，
+   * 收窄水平留白、把图标放大到 20px，拇指更容易点中。
+   *
+   * ⚠️ 只改 padding / font-size，**不动 height** —— Header 的盒高参与
+   *    「内容区顶边 = chrome 视觉底边」的计算（见本文件上方那段说明），
+   *    改高度会连带把移动端的内容区顶边也推走。
+   * ⚠️ 这段必须写在本组件 <style> 内：全局 mobile.less 里同权重的规则
+   *    会被这里的样式赢掉（组件样式注入更晚），写了也不生效。
+   */
+  @media only screen and (max-width: 767px) {
+    .trigger {
+      padding: 0 12px;
+      font-size: 20px;
+    }
+  }
 }
 </style>

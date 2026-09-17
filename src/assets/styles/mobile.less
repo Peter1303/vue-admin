@@ -1,0 +1,90 @@
+/*
+ * 移动端适配层（≤ 767px）
+ * ============================================================
+ * 断点口径与 JS 侧严格对齐：`src/layouts/observable/layout.ts` 的 mediaQuery()
+ * 在 <768px 时把 `layout.breakPoint` 置为 `xs`、`layout.isMobile` 置为 `true`，
+ * 组件据此切换「抽屉式菜单 / 隐藏 64px 占位 / 弹窗用 90% 宽」等行为。
+ * 本文件补齐的正是同一断点下 CSS 侧的那一半。
+ *
+ * ⚠️ 媒体查询里的 px 不会被 postcss-pxtorem 转换
+ *    （vite.config.mts 里 pxtorem 的 `mediaQuery` 未开启，默认 false），
+ *    所以这里的 767px 就是 767px —— 与 display.less 的断点写法同一套口径。
+ *
+ * ⚠️⚠️ 本文件只放「antd 组件 + 自身布局壳」的通用规则，
+ *    **不要把某个自有组件的移动端样式写到这里**（踩过坑）：
+ *    组件的 `<style>` 由 Vite 在运行时注入，位置晚于全局 main.less，
+ *    而两者权重往往相同 ⇒ 同名属性**组件样式赢**，新属性（组件没写的）却会生效，
+ *    于是出现「top 没改掉、bottom 却加了」这种半生效状态：
+ *    `.artiely-more-group-btn` 就这样被 left/right + top/bottom 同时撑成了
+ *    370×494 的大框，盖住整页下半部分。
+ *    ⇒ 自有组件的移动端样式一律写回组件自己的 `<style>` 里。
+ *
+ * ⚠️ 覆盖 antd 的类名时要用权重压过它（antd 是 CSS-in-JS，注入更晚）：
+ *    这里统一加 `#app` 前缀（1 个 id + 1 个 class）。
+ *
+ * ⚠️ 本文件**刻意不碰 Header 盒高**。layout1.vue / nav-tabs.vue 里那套
+ *    「Header 盒高 = chrome 视觉实高 + sticky 吸顶」是「顶部间距一致」的地基，
+ *    在此处改高度会连带影响内容区顶边，属于高风险改动 —— 移动端维持 105px 不变。
+ */
+
+@media only screen and (max-width: 767px) {
+  /* ---------------------------------------------------------
+   * 1. 内容区留白
+   *    桌面 24px 在 390px 视口下要占掉 12.3% 的宽度，收窄到 12px。
+   *    权重说明：router-page.vue 的 scoped 样式编译后是 `#router-view[data-v-x]`
+   *    （1 id + 1 attr），所以这里必须用 `#app #router-view`（2 id）才压得住。
+   * ------------------------------------------------------- */
+  #app #router-view {
+    padding: 12px;
+  }
+
+  /* ---------------------------------------------------------
+   * 2. 表格
+   *    antdv4 的 `.ant-table-content` 本身已经是 `overflow-x: auto`（实测确认），
+   *    表格不会撑破页面；但窄屏下单元格内边距会挤掉本就不多的可见列，
+   *    这里收窄内边距，并补上 iOS 的惯性滚动。
+   * ------------------------------------------------------- */
+  #app .ant-table-wrapper .ant-table-content,
+  #app .ant-table-wrapper .ant-table-body {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  #app .ant-table-wrapper .ant-table-thead > tr > th,
+  #app .ant-table-wrapper .ant-table-tbody > tr > td {
+    padding: 8px;
+  }
+
+  /* ---------------------------------------------------------
+   * 3. 按钮组换行
+   *    实测 `/antd-table-creater2` 的 `.ant-btn-group` 在 390px 下
+   *    把 body 撑宽 112px（bodyOverflowX = 112），是移动端唯一一处
+   *    真正的「页面被撑宽」。允许换行即可消掉。
+   * ------------------------------------------------------- */
+  #app .ant-btn-group {
+    flex-wrap: wrap;
+    max-width: 100%;
+  }
+
+  /* ---------------------------------------------------------
+   * 4. 卡片内边距
+   * ------------------------------------------------------- */
+  #app .ant-card-body {
+    padding: 16px;
+  }
+
+  /* ---------------------------------------------------------
+   * 5. 弹层宽度自适应
+   *    `.ant-modal` 挂在 body 下（不在 #app 内），所以不加 #app 前缀；
+   *    antd 给它的是内联 `width`，这里用 max-width 去限制结果宽度即可
+   *    （二者不冲突，max-width 一定生效）。有自定义宽度的弹窗
+   *    （如 packages/creater/CreateForm.vue 的 isMobile ? 90% : 70%）不受影响。
+   * ------------------------------------------------------- */
+  .ant-modal {
+    max-width: calc(100vw - 24px);
+    margin: 12px auto;
+  }
+
+  .ant-drawer-content-wrapper {
+    max-width: 100vw;
+  }
+}

@@ -218,6 +218,19 @@ function refreshAll() {
 
   .layout-nav-tabs {
     flex: 1;
+    /*
+     * ⚠️ `min-width: 0` 不能省 —— 这是「标签开多了整页横向滚动」的根因。
+     *
+     * flex item 的 `min-width` 默认是 `auto`：它**不能被收缩到内容宽度以下**。
+     * 于是 `flex: 1` 完全压不住内容 —— 每多开一个标签，.layout-nav-tabs 就被
+     * 撑宽一点，顺着 wrapper 一路把 documentElement 撑开：
+     * 实测连开 26 个标签时 `.layout-nav-tabs` 宽 3550px、整页横向滚动 3550px，
+     * 而 antd 自带的 `.ant-tabs-nav-wrap{overflow:hidden}` 与左右滚动箭头全程失效
+     * （因为轮到它们收缩的容器压根没被收缩）。
+     *
+     * 置 0 把收缩权交还 flex，antd 的标签溢出滚动机制才真正接管。
+     */
+    min-width: 0;
   }
 
   .layout-nav-tabs-actions {

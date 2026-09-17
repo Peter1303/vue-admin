@@ -38,7 +38,7 @@ import {computed, nextTick, onDeactivated, watch} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import subMenu from './sub-menu.vue'
 import {layout} from '@layouts'
-import {applyRouteOpenKeys, type MenuNode, menuOpenKeys} from '../observable/menu'
+import {applyRouteOpenKeys, type MenuNode, menuOpenKeys, routeOpenKeys} from '../observable/menu'
 import {routes} from '@router'
 
 defineOptions({name: 'SoloMenu'})
@@ -104,6 +104,18 @@ watch(
  *    同一批更新里我们刚写的值会被它盖掉，且之后 prop 没再变化、Menu 也不会重读 ——
  *    实测表现为「折叠态刷新后点开侧边栏，菜单仍然不展开」。
  *    延后一个 tick，让这次赋值落在它的 Restore 之后，才能真正生效。
+ *
+ * 4) **移动端每次打开抽屉都要重新定位**（`routeOpenKeys` 直接赋值，不走
+ *    `applyRouteOpenKeys` 的「只生效一次」开关）。移动端 `isCollapse` 是「抽屉开合」，
+ *    关抽屉时上面那个 watch 会把 openKeys 清空，而 `applyRouteOpenKeys` 第二次调用
+ *    是空操作 —— 结果是「开一次抽屉、关掉、再开，菜单全收起，得自己一层层点开」。
+ *    更糟的是修好「不清空」之后：抽屉里会留着上一个子菜单的展开态，而当前选中项在
+ *    另一个子菜单里（收起状态）⇒ 打开抽屉反而找不到自己在哪。
+ *    所以每次打开都按当前路由重新展开一次 —— 这也正是导航抽屉该有的行为。
+ *    桌面端不受影响，仍走「只生效一次」。
+ *
+ * 展开之后还要把选中项滚进可视区，那一步不在这里做（需要等抽屉动画结束），
+ * 见 full-menu.vue 的 `@after-open-change`。
  */
 watch(
   () => [route.path, route.matched.length, layout.isCollapse] as const,
@@ -112,7 +124,11 @@ watch(
     nextTick(() => {
       // 再次确认：这一 tick 内用户可能又把菜单收起来了
       if (layout.isCollapse || !route.matched.length) return
-      applyRouteOpenKeys(path, menu)
+      if (layout.isMobile) {
+        openKeys.value = routeOpenKeys(path, menu)
+      } else {
+        applyRouteOpenKeys(path, menu)
+      }
     })
   },
   {immediate: true}
@@ -130,6 +146,19 @@ function select(payload: { item: unknown; key: string; selectedKeys: string[] })
   } else {
     router.push(key)
   }
+  /*
+   * 移动端：点了菜单就把抽屉收起来。
+   * ------------------------------------------------------------
+   * 抽屉是覆盖式导航（240px 的抽屉盖在 357px 的屏上，右侧只剩一条遮罩），
+   * 不收起来的话页面已经在它背后完成了跳转，用户看到的是「点了没反应」，
+   * 得再去找那条遮罩点一下 —— 实测点 /workplace 后 hash 已变、`.ant-drawer-open`
+   * 仍然在。
+   *
+   * 放在这里而不是只放在 full-menu 的路由 watch 里，是为了覆盖**外链菜单项**
+   * （key 命中 reg 时走 window.open，不会变更 route，路由 watch 收不到）。
+   * 桌面端不受影响：那里 isCollapse 是「侧边栏折叠」，点菜单当然不该把它折起来。
+   */
+  if (layout.isMobile) layout.isCollapse = true
 }
 
 function onOpenChange(keys: string[]) {

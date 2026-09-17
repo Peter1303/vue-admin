@@ -1,9 +1,20 @@
 // ============================================================
-// 运行时可换肤的 CSS 变量声明（全局样式，非 scoped）
+// 运行时主题变量声明（全局样式，非 scoped）
 // ------------------------------------------------------------
 // 必须放在全局样式里：本文件被 assets/styles/main.less 在入口引入。
 // 如果写进 var.less，会被各组件 <style scoped> 编译成 :root[data-v-xxx]，永远匹配不到。
-// 变量由 layouts/observable/layout.ts 的 setPrimaryColor() 在运行时覆盖。
+//
+// 这里有两类变量，别混：
+//   ① 主题色（--primary-color / --info-color …）—— 「换肤」，由 JS 写到 <html> 上，
+//      见 layouts/observable/layout.ts 的 setPrimaryColor()；
+//   ② 主题模式（--text-color / --component-background / --header-bg …）——「浅色/深色」，
+//      由 <html> 上的 data-theme 切换，浅色值在 :root，深色覆盖见文件末尾。
+//
+// 使用约定（与主题色一致）：
+//    color: @text-color;                        // 构建期兜底（浅色）
+//    color: var(--text-color, @text-color);     // 运行时可切换
+//  带透明度的写法不能用 less 的 fade()/rgba()（构建期求值，取不到 CSS 变量），要么用
+//  color-mix(in srgb, var(--x, @x) 10%, transparent)，要么直接给不透明色。
 // ============================================================
 @import './var.less';
 
@@ -32,4 +43,87 @@
   --border-radius-sm: @border-radius-sm;
 
   --number-color: @number-color;
+
+  // ---- 主题模式（浅/深）用到的表面与填充 ----
+  // 单独给 body 一个颜色，而不是复用 --text-color：
+  // --text-color 是 antd 的 0.65 透明黑，若让它成为 body 默认色，
+  // 所有没显式设色的文字都会从 #000 变成 #595959 —— 浅色模式下的既有观感就变了。
+  --body-color: #000;
+  // Header / 顶栏底色（浅色下等于 @component-background）
+  --header-bg: @header-bg;
+  // 侧边栏：深色菜单与浅色菜单两套底色
+  --menu-background-light: @menu-background-light;
+  --menu-background-dark: @menu-background-dark;
+  // 标签条
+  --nav-tab-bg: @nav-tab-bg;
+  --nav-tab-active-bg: @nav-tab-active-bg;
+  // 次级表面
+  --background-color-light: @background-color-light;
+  --popover-background: @popover-background;
+  --input-bg: @input-bg;
+  // 中性填充块（action-bar 的搜索占位与功能块等）
+  --fill-muted: #e1e3ec;
+  // hover 填充：浅色是「叠一层淡黑」，深色必须换成「叠一层淡白」，
+  // 否则深色底上再叠黑等于完全没有 hover 反馈
+  --hover-fill: rgba(0, 0, 0, 0.06);
+}
+
+// ============================================================
+// 深色模式令牌
+// ------------------------------------------------------------
+// 取值刻意与 antd 4 的暗色算法（theme.darkAlgorithm）派生出的 Map Token 对齐，
+// 否则会出现「antd 组件一套深灰、自有样式另一套深灰」的色差：
+//
+//   colorBgBase       #000      → colorBgLayout    #000     （页面底）
+//                                 colorBgContainer #141414  （卡片 / 顶栏 / 侧边栏）
+//                                 colorBgElevated  #1f1f1f  （弹层 / 浮起表面）
+//   colorText            rgba(255,255,255,.85)
+//   colorTextSecondary   rgba(255,255,255,.65)
+//   colorBorderSecondary #303030
+//   colorBorder          #424242
+//
+// ⚠️ 深色菜单（--menu-background-dark）保持原来的深蓝 #001529 不变 ——
+//    它和 antd 暗色下 Menu 的深色底是同一个色系，换掉反而会让侧边栏「陷进」页面底里。
+// ============================================================
+html[data-theme='dark'] {
+  --text-color: rgba(255, 255, 255, 0.85);
+  --text-color-secondary: rgba(255, 255, 255, 0.65);
+  --heading-color: rgba(255, 255, 255, 0.85);
+  --disabled-color: rgba(255, 255, 255, 0.35);
+
+  --border-color-base: #424242;
+  --border-color-split: #303030;
+
+  --body-background: #000000;
+  --component-background: #141414;
+  --background-color-base: #1f1f1f;
+  --layout-body-background: #000000;
+
+  --body-color: rgba(255, 255, 255, 0.85);
+  --header-bg: #141414;
+  // 浅色菜单在深色模式下也必须是深底，否则白底 + antd 暗色文字 = 一片看不见
+  --menu-background-light: #141414;
+  --nav-tab-bg: #000000;
+  --nav-tab-active-bg: #141414;
+  --background-color-light: #1a1a1a;
+  --popover-background: #1f1f1f;
+  --input-bg: #141414;
+  --fill-muted: #303030;
+  --hover-fill: rgba(255, 255, 255, 0.12);
+
+  --number-color: rgba(255, 255, 255, 0.85);
+}
+
+// ------------------------------------------------------------
+// 页面底与默认文字色
+// 浅色取值与原实现完全一致（html/body 原本就是白底 + 默认黑字，只是没写出来），
+// 深色下则来自上面的覆盖；index.html 里还有一份同样取值的兜底，用于首帧防白闪。
+// ------------------------------------------------------------
+html {
+  background: var(--body-background);
+}
+
+body {
+  background: var(--body-background);
+  color: var(--body-color);
 }

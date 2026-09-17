@@ -1,6 +1,7 @@
 import App from './App.vue'
 import loader, {loaderAsync} from '@core/loader'
-import {layout, mediaQuery, setFontSize, setPrimaryColor} from './observable/layout'
+import {applyTheme, brandLinkTokens, layout, mediaQuery, resolvedTheme, setFontSize, setPrimaryColor, setThemeMode} from './observable/layout'
+export type {ResolvedTheme, ThemeMode} from './observable/layout'
 import {anthNavTabs} from './observable/navTabs'
 
 /**
@@ -20,4 +21,17 @@ import {anthNavTabs} from './observable/navTabs'
 const Home = loader('layouts/layout/default.vue')
 const HomeAsync = loaderAsync('layouts/layout/default.vue')
 
-export {Home, HomeAsync, App, layout, mediaQuery, setFontSize, setPrimaryColor, anthNavTabs}
+export {
+  Home,
+  HomeAsync,
+  App,
+  layout,
+  mediaQuery,
+  setFontSize,
+  setPrimaryColor,
+  brandLinkTokens,
+  resolvedTheme,
+  setThemeMode,
+  applyTheme,
+  anthNavTabs
+}

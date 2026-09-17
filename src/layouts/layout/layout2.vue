@@ -61,15 +61,16 @@ const contentStyle = {
       top: 64px;
       left: 0;
       right: 0;
-      background: @layout-sider-background;
+      // 与 sider-menu.vue 同一套口径：横向菜单条的底色也走主题令牌
+      background: var(--layout-sider-background, @layout-sider-background);
       transition: all .28s;
 
       &.dark {
-        background: @menu-background-dark;
+        background: var(--menu-background-dark, @menu-background-dark);
       }
 
       &.light {
-        background: @menu-background-light
+        background: var(--menu-background-light, @menu-background-light)
       }
 
       .layout2-solo-menu {

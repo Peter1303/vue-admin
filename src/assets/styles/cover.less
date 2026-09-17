@@ -2,8 +2,10 @@
 @import "./var.less";
 
 // 自定义滚动条的样式
+// ⚠️ 深色模式下滚动条也必须跟着变，否则页面变深、滚动条还是浅灰底 —— 一圈亮边非常扎眼。
+//    取值统一走主题令牌（见 theme-runtime.less），@xxx 作为构建期兜底。
 ::-webkit-scrollbar-track-piece {
-  background-color: @layout-body-background;
+  background-color: var(--layout-body-background, @layout-body-background);
   -webkit-border-radius: 0;
 }
 
@@ -14,16 +16,16 @@
 
 ::-webkit-scrollbar-thumb {
   height: 50px;
-  background-color: @text-color-secondary;
+  background-color: var(--text-color-secondary, @text-color-secondary);
   -webkit-border-radius: 5px;
-  outline: 1px solid @layout-body-background;
+  outline: 1px solid var(--layout-body-background, @layout-body-background);
   outline-offset: -1px;
-  border: 1px solid @layout-body-background;
+  border: 1px solid var(--layout-body-background, @layout-body-background);
 }
 
 ::-webkit-scrollbar-thumb:hover {
   height: 50px;
-  background-color: @text-color;
+  background-color: var(--text-color, @text-color);
   -webkit-border-radius: 5px;
 }
 
@@ -80,22 +82,27 @@
 }
 
 #app {
+  /*
+   * ⚠️ 这两条 Header 底色**必须**接主题令牌，不能再用 @header-bg（编译期 #fff）：
+   *    antd 的 .ant-layout-header 自己会跟随 colorBgHeader 变深，但这里用同样权重、
+   *    更靠后的自有样式又把它按回了白色 —— 深色模式下顶栏会是一整条白。
+   */
   .ant-layout-header:not(.layout2-header) {
-    background: @header-bg;
+    background: var(--header-bg, @header-bg);
   }
 
   .ant-tabs.ant-tabs-card .ant-tabs-card-bar .ant-tabs-tab {
-    background: @nav-tab-bg;
-    color: @text-color-secondary;
+    background: var(--nav-tab-bg, @nav-tab-bg);
+    color: var(--text-color-secondary, @text-color-secondary);
   }
 
   .ant-tabs.ant-tabs-card .ant-tabs-card-bar .ant-tabs-tab-active {
-    background: @nav-tab-active-bg;
-    color: @nav-tab-active-color;
+    background: var(--nav-tab-active-bg, @nav-tab-active-bg);
+    color: var(--primary-color, @nav-tab-active-color);
   }
 
   .number {
-    color: @number-color;
+    color: var(--number-color, @number-color);
   }
 
   .ant-input-affix-wrapper .ant-input-prefix .anticon {
@@ -105,11 +112,11 @@
   .ivu-divider-horizontal.ivu-divider-with-text-center,
   .ivu-divider-horizontal.ivu-divider-with-text-left,
   .ivu-divider-horizontal.ivu-divider-with-text-right {
-    color: @text-color-secondary;
+    color: var(--text-color-secondary, @text-color-secondary);
   }
 
   .ant-alert-message {
-    color: @text-color !important;
+    color: var(--text-color, @text-color) !important;
   }
 
   .ant-menu-inline, .ant-menu-vertical, .ant-menu-vertical-left {
@@ -117,7 +124,7 @@
   }
 
   .layout1-header {
-    background: @header-bg;
+    background: var(--header-bg, @header-bg);
   }
 
 }

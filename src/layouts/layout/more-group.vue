@@ -36,6 +36,24 @@
             <v-icon v-if="currTheme.color===item.color" name="icon-right"/>
           </span>
         </div>
+        <!--
+          主题模式：浅色 / 深色 / 自动
+          · 用 a-radio-button（分段控件）而不是并排三个 a-radio：
+            这三项是互斥的「模式」，分段控件的选中态比三个圆点更直白，
+            也顺手解决了两行「黑色菜单 / 白色菜单」挤在一起时的辨识问题。
+          · `:value` + `@change` 而不是 `v-model:value="layout.themeMode"`：
+            写入统一走 setThemeMode()，那里带白名单校验（缓存里的脏值、以后新增的调用点都吃这一层）。
+        -->
+        <a-radio-group :value="layout.themeMode" @change="themeModeChange">
+          <a-radio-button value="light">浅色</a-radio-button>
+          <a-radio-button value="dark">深色</a-radio-button>
+          <a-radio-button value="auto">自动</a-radio-button>
+        </a-radio-group>
+        <div class="theme-mode-tip">
+          当前生效：{{ resolvedTheme === 'dark' ? '深色' : '浅色' }}<template
+          v-if="layout.themeMode === 'auto'">（跟随系统）</template>
+        </div>
+        <div style="height:10px"></div>
         <a-radio-group v-model:value="layout.menuTheme">
           <a-radio value="dark">黑色菜单</a-radio>
           <a-radio value="light">白色菜单</a-radio>
@@ -68,7 +86,8 @@
 
 <script lang="ts" setup>
 import {ref} from 'vue'
-import {layout, setFontSize, setPrimaryColor} from '../observable/layout'
+import {layout, resolvedTheme, setFontSize, setPrimaryColor, setThemeMode} from '../observable/layout'
+import type {ThemeMode} from '../observable/layout'
 
 interface ColorItem {
   key: string
@@ -142,6 +161,17 @@ function handleItem(item: ColorItem) {
   setPrimaryColor(item.color)
 }
 
+/**
+ * 切换主题模式
+ * 只负责「告诉状态层选了什么」，真正落地（写 html[data-theme]、切 antd 算法）在
+ * observable/layout.ts 里 —— setThemeMode 写 layout.themeMode，随后由
+ * 一个 watch(resolvedTheme) 做唯一一次落盘。'auto' 下没有任何额外处理：
+ * 系统偏好一变，那个 watch 自己会跟着切。
+ */
+function themeModeChange(e: { target: { value: string } }) {
+  setThemeMode(e.target.value as ThemeMode)
+}
+
 function colorWeakChange(colorWeak: boolean) {
   colorWeak ? document.body.classList.add('colorWeak') : document.body.classList.remove('colorWeak')
 }
@@ -166,7 +196,9 @@ function colorWeakChange(colorWeak: boolean) {
       width: 30px;
       height: 30px;
       margin: 5px;
-      background: @component-background;
+      // 悬浮组挂在页面留白里（不在任何卡片内），深色下必须跟着变成深底，
+      // 否则右侧会吊着三个白色小方块
+      background: var(--component-background, @component-background);
       text-align: center;
       line-height: 30px;
       cursor: pointer;
@@ -211,6 +243,14 @@ function colorWeakChange(colorWeak: boolean) {
   text-align: center;
   line-height: 25px;
   overflow: hidden;
+}
+
+/* 「当前生效：深色/浅色」那行说明文字，压低存在感即可 */
+.theme-mode-tip {
+  margin-top: 8px;
+  color: var(--text-color-secondary, @text-color-secondary);
+  font-size: 12px;
+  line-height: 1.5;
 }
 
 /*

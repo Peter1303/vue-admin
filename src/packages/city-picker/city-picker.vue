@@ -101,13 +101,15 @@ function choiceTag(key: string) {
 
 @vcp-panel-width: 500px;
 @vcp-radius: 6px;
-@vcp-hover-bg: rgba(0, 0, 0, 0.06);
+// 原为写死的 rgba(0, 0, 0, 0.06)：深色底上「再叠一层黑」等于没有 hover 反馈，
+// 改走主题令牌（--hover-fill，浅色与原来完全等价，深色换成白光叠加）
+@vcp-hover-bg: var(--hover-fill, rgba(0, 0, 0, 0.06));
 
 // 原模板用的是裸 <h5>，被 UA 的 0.83em 压到 11.62px，比面板正文还小。
 // 对齐 antd v5 colorTextHeading。
 h5 {
   margin: 0 0 8px;
-  color: rgba(0, 0, 0, 0.88);
+  color: var(--heading-color, rgba(0, 0, 0, 0.88));
   font-size: 14px;
   font-weight: 600;
   line-height: 22px;
@@ -131,7 +133,8 @@ h5 {
     padding: 0 6px;
     border-radius: @vcp-radius;
     // 原为 @component-background(#fff)，在白色 popover 上完全看不出边界
-    background-color: rgba(0, 0, 0, 0.04);
+    // 写死的 4% 黑在深色 popover 上同样看不见，改走令牌（浅色 #f5f5f5 ≙ 4% 黑）
+    background-color: var(--background-color-base, rgba(0, 0, 0, 0.04));
     text-align: center;
     cursor: pointer;
     transition: background-color 0.2s, color 0.2s;

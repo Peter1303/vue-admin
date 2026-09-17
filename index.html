@@ -12,6 +12,52 @@
     <title>vue-admin</title>
     <!-- iconfont：packages/IconFont 与 Icon 组件依赖 icon-* 类名 -->
     <link href="//at.alicdn.com/t/font_1326052_lr1bez3k2nc.css" rel="stylesheet"/>
+    <!--
+      主题模式首屏预置（必须留在 <head> 里同步执行）
+      ------------------------------------------------------------
+      目的只有一个：**不让深色模式先闪一下白**。
+
+      页面的挂载顺序是「解析 HTML → 执行 main.ts 的模块 → 恢复主题」，而主题恢复发生在
+      observable/layout.ts 里，等它跑到时首帧早就画完了 —— 深色模式下那首帧就是一块白屏。
+      所以这里先同步读一次缓存，把 data-theme / color-scheme 写上；
+      之后 layout.ts 的 applyTheme() 会用同一套规则再写一次（它才是事实来源，这里只是提前量）。
+
+      ⚠️ 判定逻辑必须与 observable/layout.ts 的 resolvedTheme 保持一致，改一处要想着另一处：
+         只有 themeMode === 'dark'，或 'auto' 且系统偏好深色，才算深色；其余（含缓存缺失、
+         被手工改坏、隐私模式下 localStorage 抛错）一律浅色。
+      ⚠️ 下面这段底色只是**兜底**，真正的 html 底色是 assets/styles/theme-runtime.less 里的
+         `var(--body-background)`，两份取值刻意保持一致；它的价值在于随 HTML 一起到达，
+         不用等 CSS/JS 包下载。
+    -->
+    <style>
+      html {
+        background: #fff;
+      }
+
+      html[data-theme='dark'] {
+        background: #000;
+      }
+    </style>
+    <script>
+      (function () {
+        var mode = 'light'
+        try {
+          var raw = localStorage.getItem('layout')
+          var cached = raw ? JSON.parse(raw) : null
+          if (cached && (cached.themeMode === 'light' || cached.themeMode === 'dark' || cached.themeMode === 'auto')) {
+            mode = cached.themeMode
+          }
+        } catch (e) {
+          console.warn('[theme] 本地缓存不可用，按浅色启动', e)
+        }
+        var dark = mode === 'dark' ||
+          (mode === 'auto' && !!window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)
+        var html = document.documentElement
+        html.setAttribute('data-theme', dark ? 'dark' : 'light')
+        // 原生部分（滚动条 / 表单控件 / 自动填充）跟着走，细节见 observable/layout.ts
+        html.style.colorScheme = dark ? 'dark' : 'light'
+      })()
+    </script>
 </head>
 <body>
 <noscript>

@@ -199,7 +199,7 @@ function closeRadio(eq: any, val: any) {
 @import "@/assets/styles/var.less";
 
 .filterbox {
-  background: @input-bg;
+  background: var(--input-bg, @input-bg);
   border-radius: 4px;
   box-shadow: 0 5px 12px rgba(0, 0, 0, 0.1);
   // REVIEW(迁移): 字号必须显式写回 14px。
@@ -214,6 +214,11 @@ function closeRadio(eq: any, val: any) {
   .filter-tags {
     padding: 10px 20px;
     border-top: 1px solid #d5d5d5;
+
+    // 深色模式下 #d5d5d5 是一条扎眼的亮线；浅色沿用原值，不引入任何观感变化
+    html[data-theme='dark'] & {
+      border-top-color: var(--border-color-split, #d5d5d5);
+    }
   }
 
   .filter-search {
@@ -241,6 +246,12 @@ function closeRadio(eq: any, val: any) {
 
   .filterbox-group {
     border-top: 1px solid #d5d5d5;
+
+    // 同上：深色下换成令牌里的分隔线色
+    html[data-theme='dark'] & {
+      border-top-color: var(--border-color-split, #d5d5d5);
+    }
+
     display: flex;
     // background: @background-color-base;
     .filterbox-item {

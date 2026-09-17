@@ -60,7 +60,8 @@
   .action-search {
     width: 200px;
     height: 30px;
-    background: #e1e3ec;
+    // 中性填充块：深色下用 --fill-muted 的深色值，否则这两个方块会亮在深色页面上
+    background: var(--fill-muted, #e1e3ec);
     border-radius: 4px;
     margin: 10px;
   }
@@ -79,7 +80,7 @@
   .action-icon {
     height: 30px;
     width: 30px;
-    background: #e1e3ec;
+    background: var(--fill-muted, #e1e3ec);
     line-height: 30px;
     text-align: center;
     margin: 5px;

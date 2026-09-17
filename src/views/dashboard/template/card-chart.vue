@@ -281,13 +281,13 @@ function renderChartTriangle() {
     font-size: 16px;
     font-weight: 500;
     margin-bottom: 0;
-    color: #595d6e;
+    color: var(--text-color, #595d6e);
   }
 
   .sub-title {
     font-size: 12px;
     display: inline-block;
-    color: #74788d;
+    color: var(--text-color-secondary, #74788d);
   }
 }
 </style>

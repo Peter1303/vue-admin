@@ -216,10 +216,16 @@ function handleSubmit(e?: Event) {
   .todoitem {
     min-height: 50px;
     line-height: 1.5;
-    background: #f8f8f8;
+    // 深色模式下写死的 #f8f8f8 会是一整块亮底；浅色下 #fafafa 与原值肉眼无差
+    background: var(--background-color-light, #f8f8f8);
     display: flex;
     color: #333;
     margin-bottom: 8px;
+
+    // #333 落在深色底上几乎看不见；浅色保持原值，不动既有观感
+    html[data-theme='dark'] & {
+      color: var(--text-color, #333);
+    }
 
     &.has-done {
       .todo-label {

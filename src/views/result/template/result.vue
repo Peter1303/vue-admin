@@ -63,7 +63,7 @@ withDefaults(defineProps<Props>(), {
 
   .title {
     font-size: 24px;
-    color: @text-color;
+    color: var(--text-color, @text-color);
     font-weight: 500;
     line-height: 32px;
     margin-bottom: 16px;
@@ -72,7 +72,7 @@ withDefaults(defineProps<Props>(), {
   .description {
     font-size: 14px;
     line-height: 22px;
-    color: @text-color-secondary;
+    color: var(--text-color-secondary, @text-color-secondary);
     margin-bottom: 24px;
   }
 

@@ -240,19 +240,28 @@ function toggle() {
     }
   }
 
+  /*
+   * 抽屉底色同样接主题令牌：深色模式下「浅色菜单」也得是深底（#141414），
+   * 否则这一整屏抽屉是白的、而菜单文字按 antd 暗色渲染成浅色 —— 整个菜单消失。
+   */
   &.light {
     .ant-drawer-wrapper-body {
-      background: @menu-background-light;
+      background: var(--menu-background-light, @menu-background-light);
     }
 
     .menu-drawer-close {
       color: rgba(0, 0, 0, 0.45);
+
+      // 深色模式下 .light 拿到的是深底 #141414，深灰的叉会看不见
+      html[data-theme='dark'] & {
+        color: rgba(255, 255, 255, 0.65);
+      }
     }
   }
 
   &.dark {
     .ant-drawer-wrapper-body {
-      background: @menu-background-dark;
+      background: var(--menu-background-dark, @menu-background-dark);
     }
 
     .menu-drawer-close {

@@ -308,7 +308,9 @@ onBeforeRouteLeave(() => {
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed;
-  background: #eee;
+  // 登录页是满屏页，不在 .ant-layout 里，拿不到 antd 的暗色底 —— 自己接主题令牌，
+  // 否则深色模式下会是一整块浅灰底配一个深色弹窗
+  background: var(--layout-body-background, #eee);
 }
 
 canvas {

@@ -80,7 +80,9 @@ function handleToHome() {
 
   .content {
     h1 {
-      color: #434e59;
+      // 错误页是挂在 #app 下的满屏页（没有布局壳），文字色必须自己接主题令牌：
+      // 深色模式下页底是 #000，写死的 #434e59 会变成一块看不出来的深灰
+      color: var(--heading-color, #434e59);
       font-size: 72px;
       font-weight: 600;
       line-height: 72px;
@@ -88,7 +90,7 @@ function handleToHome() {
     }
 
     .desc {
-      color: rgba(0, 0, 0, 0.45);
+      color: var(--text-color-secondary, rgba(0, 0, 0, 0.45));
       font-size: 20px;
       line-height: 28px;
       // 原来 16px（紧贴按钮），改成与标题同节奏的 24px

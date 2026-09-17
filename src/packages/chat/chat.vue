@@ -191,7 +191,7 @@ onMounted(() => {
   border-radius: 8px;
   box-shadow: 0 0 22px rgba(0, 0, 0, 0.1);
   display: flex;
-  background: fade(@background-color-base, 90%);
+  background: color-mix(in srgb, var(--background-color-base, @background-color-base) 90%, transparent);
   flex-direction: column;
   overflow: hidden;
 
@@ -210,7 +210,7 @@ onMounted(() => {
     .top-m {
       flex: 1;
       font-size: 18px;
-      color: @text-color;
+      color: var(--text-color, @text-color);
       line-height: 40px;
     }
 
@@ -247,7 +247,7 @@ onMounted(() => {
 
   .custom-list {
     display: flex;
-    border-top: 1px solid @background-color-base;
+    border-top: 1px solid var(--background-color-base, @background-color-base);
     padding: 10px 0;
 
     .userinfo {
@@ -258,7 +258,7 @@ onMounted(() => {
 
       .name {
         font-size: 14px;
-        color: @text-color-secondary;
+        color: var(--text-color-secondary, @text-color-secondary);
         margin: 0;
       }
 
@@ -291,7 +291,7 @@ onMounted(() => {
 
   .chat-content-wrapper {
     flex: 2;
-    background: rgba(@layout-body-background, 0.9);
+    background: color-mix(in srgb, var(--layout-body-background, @layout-body-background) 90%, transparent);
     display: flex;
     flex-direction: column;
 
@@ -359,7 +359,7 @@ onMounted(() => {
 
     .chat-input {
       flex: 1;
-      background: @layout-body-background;
+      background: var(--layout-body-background, @layout-body-background);
       display: flex;
       flex-direction: column;
 
@@ -388,14 +388,15 @@ onMounted(() => {
     overflow-y: scroll;
 
     .message-item {
-      background: @body-background;
+      background: var(--body-background, @body-background);
       cursor: pointer;
       padding: 3px 8px;
       border-radius: 4px;
       margin: 5px 10px;
 
       &:hover {
-        background: darken(@body-background, 10%);
+        // darken() 是编译期函数，取不到 CSS 变量；color-mix 与它在 #fff 上等价（90% 白 + 10% 黑 = #e6e6e6）
+        background: color-mix(in srgb, var(--body-background, @body-background) 90%, black);
       }
     }
   }

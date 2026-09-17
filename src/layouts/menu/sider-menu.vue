@@ -50,12 +50,19 @@ const style = computed(() => [
 }
 
 .ant-layout-sider {
+  /*
+   * 侧边栏底色必须接主题令牌，而且必须保留 `!important`：
+   * 这两条是同权重、位置更靠后的自有样式，用来压 antd 给 .ant-layout-sider 的 token 底色。
+   * 深色模式下的取值为：深色菜单仍是深蓝 #001529（与 antd 暗色 Menu 同色系），
+   * 浅色菜单换成 #141414（colorBgContainer）—— 否则「深色模式 + 白色菜单」
+   * 会是一整条白底配浅色文字，等于整列菜单都看不见。
+   */
   &.light {
-    background: @menu-background-light !important;
+    background: var(--menu-background-light, @menu-background-light) !important;
   }
 
   &.dark {
-    background: @menu-background-dark !important;
+    background: var(--menu-background-dark, @menu-background-dark) !important;
   }
 
   &.is-collapse {

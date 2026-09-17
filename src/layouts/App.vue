@@ -25,7 +25,8 @@ import {computed, onBeforeUnmount, onMounted, watch} from 'vue'
 // ⚠️ antdv 4 里 `ant-design-vue/lib/locale-provider/zh_CN` 已不存在（该目录下只剩 index/LocaleReceiver），
 // 被 Vite import 到会直接返回 500，入口模块挂掉 = 整站白屏。正确路径是 es/locale/zh_CN
 import zhCN from 'ant-design-vue/es/locale/zh_CN'
-import {layout, mediaQuery} from '@layouts'
+import {theme} from 'ant-design-vue'
+import {brandLinkTokens, layout, mediaQuery, resolvedTheme} from '@layouts'
 
 defineOptions({name: 'App'})
 
@@ -33,13 +34,36 @@ defineOptions({name: 'App'})
 const locale = zhCN
 
 /**
- * antd 组件的主题色
- * 原来靠 window.less.modifyVars() 运行时重编译 less，antdv 4 已无 less.js；
- * 现在改成 ConfigProvider token，配合 layout.setPrimaryColor() 写的
- * `--primary-color` CSS 变量，让 antd 组件与自有 less 用同一套主题色。
+ * antd 组件的主题
+ * ------------------------------------------------------------
+ * 两条腿之一（另一条是自有 less 的 CSS 变量，见 observable/layout.ts 的说明）：
+ *
+ *   · `algorithm` 管深浅 —— darkAlgorithm 会把全部 token 重新派生一遍
+ *     （colorBgLayout/ colorBgContainer / colorText / colorBorder…），
+ *     a-card / a-table / a-modal / a-menu 等所有 antd 组件随之变深，
+ *     连 reset 里的 body 底色也一起算在内；
+ *   · `token` 管品牌色 —— 主题色与 colorLink 三件套，和深浅无关，两种模式下都生效。
+ *
+ * ⚠️ 必须放在 computed 里：algorithm 依赖 resolvedTheme，
+ *    若把它固化成常量对象，切模式时 antd 不会重算 token（整个界面停在旧色）。
+ *
+ * ⚠️ 主题色那条腿不要跟着深浅走：`--primary-color` 由 setPrimaryColor() 写在 <html> 上，
+ *    深色下保持同一个品牌色（antd 的 darkAlgorithm 会自己把它调成适合暗底的色阶）。
+ *
+ * ⚠️ 必须一并下发 `colorLink` 三件套（brandLinkTokens）。
+ *    antd v4 的 `colorLink` 派生自**独立的** seed token `colorInfo`（默认 #1677ff），
+ *    跟 `colorPrimary` 没有关系 —— 只设 colorPrimary 时，主按钮/选中态都跟着换，
+ *    但裸 `<a>` 会原地不动：最显眼的就是右上角个人中心那个
+ *    `<a class="ant-dropdown-link">`（用户名 + 下拉箭头），
+ *    默认态是 #1677ff、换肤后仍是 #1677ff，是全站唯一"两种蓝"的地方。
+ *    （门店/表格里的 `<a-button type="link">` 同理，见 es/button/style 的 colorLink 引用。）
  */
 const antdTheme = computed(() => ({
-  token: {colorPrimary: layout.primaryColor}
+  algorithm: resolvedTheme.value === 'dark' ? theme.darkAlgorithm : theme.defaultAlgorithm,
+  token: {
+    colorPrimary: layout.primaryColor,
+    ...brandLinkTokens(layout.primaryColor)
+  }
 }))
 
 /** 弹层挂载点：trigger 可能为空，直接读 parentNode 会抛错 */

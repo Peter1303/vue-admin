@@ -191,11 +191,17 @@ function refreshAll() {
 <style lang="less">
 @import "@/assets/styles/var.less";
 
+/*
+ * 标签条是「顶部 chrome」的一部分，底色必须接主题令牌（--nav-tab-bg）：
+ * 浅色下 未选中 #f9f9f9 / 选中 #fff，深色下 未选中 #000 / 选中 #141414 ——
+ * 都是「未选中比选中更暗」，选中项自然浮起来，两种模式方向一致。
+ * 不接令牌的话，深色模式下会横着一条浅灰，直接盖住整个顶栏。
+ */
 .layout-nav-tabs-wrapper .layout-nav-tabs.capsule .ant-tabs-tab {
   height: 30px !important;
   line-height: 30px !important;
   border-radius: 17px !important;
-  border: 1px solid @nav-tab-bg !important;
+  border: 1px solid var(--nav-tab-bg, @nav-tab-bg) !important;
   margin-top: 5px !important;
   margin-right: 5px !important;
 
@@ -214,7 +220,7 @@ function refreshAll() {
   position: relative;
   z-index: 100;
   user-select: none;
-  background: @nav-tab-bg;
+  background: var(--nav-tab-bg, @nav-tab-bg);
 
   .layout-nav-tabs {
     flex: 1;
@@ -238,7 +244,7 @@ function refreshAll() {
     height: 40px;
     line-height: 40px;
     text-align: center;
-    color: @text-color;
+    color: var(--text-color, @text-color);
     cursor: pointer;
     font-size: 12px;
 
@@ -247,7 +253,7 @@ function refreshAll() {
       height: 100%;
 
       .anticon {
-        color: @text-color;
+        color: var(--text-color, @text-color);
       }
     }
   }

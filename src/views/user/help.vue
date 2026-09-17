@@ -1,36 +1,15 @@
 <template>
   <a-card>
     <!-- FIXME:这个组件太大 暂不使用 -->
-    <!-- <vue-markdown :source="msg" ></vue-markdown> -->
-
   </a-card>
 </template>
 
-<script>
-import markdown from '../../../README.md'
-// import VueMarkdown from 'vue-markdown'
-// import hljs from 'highlight.js'
+<script lang="ts" setup>
+import markdown from '../../../README.md?raw'
 import 'highlight.js/styles/github.css'
-// import $ from 'jquery'
-export default {
-  components: {
-    // VueMarkdown
-    // markdown
-  },
-  data () {
-    return {
-      msg: markdown
-    }
-  },
-  mounted () {
-    this.$nextTick(() => {
-      // hljs.configure({ useBR: true })
-      // $('pre code').each(function (i, block) {
-      //   hljs.highlightBlock(block)
-      // })
-    })
-  }
-}
+
+// 原 vue-markdown 渲染被注释禁用（组件太大），markdown 原文先保留在 msg 上以备后续启用。
+const msg = markdown
 </script>
 
 <style scoped>

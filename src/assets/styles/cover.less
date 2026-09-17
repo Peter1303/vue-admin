@@ -2,38 +2,77 @@
 @import "./var.less";
 
 // 自定义滚动条的样式
-::-webkit-scrollbar-track-piece{
-	background-color:@layout-body-background;
-	-webkit-border-radius:0;
-}
-::-webkit-scrollbar{
-	width:8px;
-	height:8px;
-}
-::-webkit-scrollbar-thumb{
-	height:50px;
-	background-color:@text-color-secondary;
-	-webkit-border-radius:5px;
-	outline:1px solid @layout-body-background;
-	outline-offset:-1px;
-	border: 1px solid @layout-body-background;
-}
-::-webkit-scrollbar-thumb:hover{
-	height:50px;
-	background-color:@text-color;
-	-webkit-border-radius:5px;
+::-webkit-scrollbar-track-piece {
+  background-color: @layout-body-background;
+  -webkit-border-radius: 0;
 }
 
-.artiely-menu
-  .ant-menu-inline-collapsed
-  > .ant-menu-submenu
-  > .ant-menu-submenu-title {
-  padding: 0 !important;
-  text-align: center;
-  .anticon {
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  height: 50px;
+  background-color: @text-color-secondary;
+  -webkit-border-radius: 5px;
+  outline: 1px solid @layout-body-background;
+  outline-offset: -1px;
+  border: 1px solid @layout-body-background;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  height: 50px;
+  background-color: @text-color;
+  -webkit-border-radius: 5px;
+}
+
+/* ============================================================
+ * 折叠态菜单（.ant-menu-inline-collapsed）
+ * ------------------------------------------------------------
+ * ⚠️ 原实现靠 `text-align: center` 把图标摆在条目正中间 —— 这套写法在 antdv 1 下是成立的，
+ *    antdv 4 有两处结构性变化把它破坏。实测（80px 折叠宽度，条目中心 x=40、图标应在 x=28）：
+ *      10 个一级条目里 9 个图标被顶到 x=4（左偏 24px），唯独不含子菜单的 /level1
+ *      是居中的 —— 于是侧边栏变成「一片图标贴着左边、最后一个居中且更小」。
+ *    ① 折叠时标题文字被包进 <span class="ant-menu-title-content">，antd 只用
+ *       `opacity: 0` 隐藏它，**文字仍然占据行内宽度**（“现场管理”≈56px）。
+ *       [图标 24px + 文字 56px] = 80px > 标题容器 72px，超宽行不会被居中，而是从
+ *       内容区左边缘开始排布（多余部分被 overflow: hidden 裁掉）→ 图标贴左。
+ *       → 这里让这串「看不见的文字」彻底不参与宽度计算（DOM 保留，antd 的折叠态
+ *         tooltip 需要从子节点里取文本）。
+ *    ② 折叠态 `.anticon` 的字号被 antd 重置成 16px，只能 !important 压回；而原样式
+ *       只为子菜单标题写了 24px，一级菜单项仍是 18px，同一列里出现两种大小
+ *       → 折叠态统一为 24px（展开态仍是 18px，见下方规则）。
+ * ============================================================ */
+.ant-menu-inline-collapsed {
+  // 折叠态标题文字：保留 DOM（tooltip 取用），但不占宽度
+  .ant-menu-title-content > span:not(.anticon) {
+    display: inline-block;
+    max-width: 0;
+    // ⚠️ 这一条不能省：antd 给「图标 + 文字」之间留了 10px 间距
+    //    （margin-inline-start），折叠态只把文字设成 opacity: 0，并没有取消间距。
+    //    不清零的话整行仍是 图标 24 + 间距 10 = 34px，图标依旧左偏 5px（实测 offBy=-5）。
+    margin-inline-start: 0 !important;
+    margin-left: 0 !important;
+    overflow: hidden;
+    vertical-align: middle;
+  }
+
+  // 折叠态图标尺寸统一
+  > .ant-menu-item .anticon,
+  > .ant-menu-submenu > .ant-menu-submenu-title .anticon {
     font-size: 24px !important;
   }
 }
+
+.artiely-menu
+.ant-menu-inline-collapsed
+> .ant-menu-submenu
+> .ant-menu-submenu-title {
+  padding: 0 !important;
+  text-align: center;
+}
+
 .ant-menu-item .anticon,
 .ant-menu-submenu-title .anticon {
   font-size: 18px !important;
@@ -44,43 +83,119 @@
   .ant-layout-header:not(.layout2-header) {
     background: @header-bg;
   }
+
   .ant-tabs.ant-tabs-card .ant-tabs-card-bar .ant-tabs-tab {
     background: @nav-tab-bg;
     color: @text-color-secondary;
   }
+
   .ant-tabs.ant-tabs-card .ant-tabs-card-bar .ant-tabs-tab-active {
     background: @nav-tab-active-bg;
     color: @nav-tab-active-color;
   }
+
   .number {
     color: @number-color;
   }
+
   .ant-input-affix-wrapper .ant-input-prefix .anticon {
     // color: @text-color-secondary;
   }
+
   .ivu-divider-horizontal.ivu-divider-with-text-center,
   .ivu-divider-horizontal.ivu-divider-with-text-left,
   .ivu-divider-horizontal.ivu-divider-with-text-right {
     color: @text-color-secondary;
   }
-  .ant-alert-message{
-    color: @text-color!important;
+
+  .ant-alert-message {
+    color: @text-color !important;
   }
-  .ant-menu-inline, .ant-menu-vertical, .ant-menu-vertical-left{
+
+  .ant-menu-inline, .ant-menu-vertical, .ant-menu-vertical-left {
     border: none
   }
-  .layout1-header{
+
+  .layout1-header {
     background: @header-bg;
   }
 
 }
-#components-layout-demo-side{
+
+#components-layout-demo-side {
   // .ant-layout-sider{
   //   overflow-y:hidden 
   // }
-  .ant-layout-sider-children{
-    overflow-y:auto;
+  .ant-layout-sider-children {
+    overflow-y: auto;
     overflow-x: hidden;
     // margin-right:-25px;
+  }
+}
+
+/* ============================================================
+ * 顶部路由加载进度条（nprogress）跟随主题色
+ * ------------------------------------------------------------
+ * 现象：换肤成橙色/绿色后，顶部那道 2px 进度条仍然是蓝的。
+ *
+ * 根因：颜色被写死在第三方样式 `nprogress/nprogress.css` 里 ——
+ *   `#nprogress .bar { background: #29d; }`
+ *   `#nprogress .peg { box-shadow: 0 0 10px #29d, 0 0 5px #29d; }`
+ *   `#nprogress .spinner-icon { border-top-color: #29d; border-left-color: #29d; }`
+ *   `#29d`(#2299dd) 与 antd 默认主色 #1890FF 很接近，所以只有换肤之后才暴露出来。
+ *
+ * 注意 NProgress 不是 antd 组件，App.vue 的
+ * `<a-config-provider :theme="{ token: { colorPrimary } }">` 覆盖不到它 ——
+ * 只能自己接 CSS 变量（由 layout.setPrimaryColor() 写到 <html> 上）。
+ *
+ * 选择器与 nprogress.css 保持同形（`#nprogress .bar`，同优先级 + 靠后加载即可胜出）；
+ * 加 !important 是为了不依赖「nprogress.css 一定先于 main.less 被引入」这一顺序假设，
+ * 以后调整 main.ts 的 import 顺序或被构建拆包都不会反超。
+ * ============================================================ */
+#nprogress {
+  /* ⚠️ 下面这两行不能删 —— 固定布局下进度条会在「准备消失」的那一瞬被顶部 Header 吃掉。
+   *
+   * 现象：layoutMode='fixed' 时，进度条加载期间正常可见；但 done() 淡出的瞬间，
+   *       压在顶部固定 Header（x ≥ 240）上的那一段整段消失，只剩压在深色侧边栏上的
+   *       一小截（像素实测：0-239 为半透明蓝、240-1439 变成纯白 #fff）。
+   *       flow 布局下不会出现（量过，淡出时整行都是半透明蓝）。
+   *
+   * 根因：NProgress.done() 会给 #nprogress 自己写上内联 `opacity: 0`
+   *       （配 `transition: all 200ms linear`）来实现淡出。
+   *       而「opacity < 1」会让 #nprogress 自己变成一个层叠上下文，
+   *       于是它整棵子树里的 `.bar{position:fixed;z-index:1031}` 不能再参与**根**层叠上下文，
+   *       只能在 #nprogress 这一层里排序 —— 等于整个进度条被降到「z-index: auto/0」那一档。
+   *       而固定 Header 是 `position: fixed; z-index: 99`（正 z-index），绘制顺序在它之后，
+   *       就把进度条盖住了。
+   *       （为什么压在侧边栏上那截还在：侧边栏 z-index 是 auto，与 #nprogress 同一档，
+   *        而 #nprogress 在 DOM 里排在它之后，所以反而压得住它。
+   *        为什么只在固定布局复现：Header 只有 layoutMode==='fixed' 时才是 fixed + z-index:99，
+   *        flow 布局下它是 static、同属最低档，而 #nprogress 在 body 里排最后，照样压得住。）
+   *
+   * 修法：让 #nprogress 自己也成为「定位元素 + 显式 z-index」，
+   *       这样无论它的 opacity 怎么变，整棵子树都稳定待在 1031 这一层。
+   *       值沿用 nprogress 给 .bar 的 1031：高于应用自身层级最大值（full-menu 的 1001、
+   *       layout2 Header 的 999、header1 的 101），又低于 antd 浮层（dropdown/tooltip 1050+）。
+   *
+   * ⚠️ 只能加在 #nprogress（wrapper）上，加在 `.bar` 上无效 —— `.bar` 的 z-index
+   *    本来就够高，问题是它被关在 wrapper 这个层叠上下文里了。
+   */
+  position: relative;
+  z-index: 1031;
+
+  .bar {
+    background: var(--primary-color, @primary-color) !important;
+  }
+
+  .peg {
+    box-shadow: 0 0 10px var(--primary-color, @primary-color),
+    0 0 5px var(--primary-color, @primary-color) !important;
+  }
+
+  // spinner 目前被 core/router.ts 的 NProgress.configure({ showSpinner: false }) 关掉了，
+  // 一并接上变量，避免以后打开时又跑回默认蓝
+  .spinner-icon {
+    border-top-color: var(--primary-color, @primary-color) !important;
+    border-left-color: var(--primary-color, @primary-color) !important;
   }
 }

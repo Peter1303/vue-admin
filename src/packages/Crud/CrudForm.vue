@@ -1,117 +1,114 @@
 <template>
-  <div v-if="value">
+  <div v-if="modelValue">
     <a-modal
-      :visible="value"
-      @ok="handleSubmit"
+      v-model:open="visible"
       @cancel="cancel"
+      @ok="handleSubmit"
     >
-      <div slot="title">
-        <a-icon :type="icon" />
+      <template #title>
+        <a-icon :type="icon"/>
         &nbsp;{{ title }}
-      </div>
-      <a-form
-        :form="formAction"
-        @submit="handleSubmit"
-      >
-        <template v-for="(item) in columns">
+      </template>
+      <a-form ref="formRef" :model="model" :rules="rules" @submit.prevent="handleSubmit">
+        <template v-for="(item) in columns" :key="item._uuid">
           <a-form-item
-            :key="item._uuid"
             v-if="item.formOptions"
             :label="item.title"
             :label-col="{ span: labelCol }"
+            :name="item.dataIndex"
             :wrapper-col="{ span: wrapperCol }"
           >
             <!-- input -->
             <a-input
-              v-if="item.formOptions.el=='input'"
+              v-if="item.formOptions.el == 'input'"
+              v-model:value="model[item.dataIndex]"
               :disabled="item._disabled"
-              :size="size"
               :placeholder="item.formOptions.placeholder"
+              :size="size"
               :type="item.formOptions.type"
-              v-decorator="[
-                item.dataIndex,
-                {rules: item.formOptions.rules,initialValue: decRow[item.dataIndex]}
-              ]"
+            />
+            <!-- input.search -->
+            <a-input-search
+              v-else-if="item.formOptions.el == 'input.search'"
+              v-model:value="model[item.dataIndex]"
+              :disabled="item._disabled"
+              :placeholder="item.formOptions.placeholder"
+              :size="size"
+              :type="item.formOptions.type"
             />
             <!-- select -->
             <a-select
-              v-else-if="item.formOptions.el=='select'"
+              v-else-if="item.formOptions.el == 'select'"
+              v-model:value="model[item.dataIndex]"
               :disabled="item._disabled"
-              :size="size"
-              :placeholder="item.formOptions.placeholder"
               :mode="item.formOptions.type"
-              v-decorator="[
-                item.dataIndex,
-                {rules: item.formOptions.rules,initialValue: decRow[item.dataIndex]}
-              ]"
               :options="item.formOptions.options"
+              :placeholder="item.formOptions.placeholder"
+              :size="size"
             />
             <!-- switch -->
             <a-switch
-              v-else-if="item.formOptions.el=='switch'"
+              v-else-if="item.formOptions.el == 'switch'"
+              v-model:checked="model[item.dataIndex]"
               :disabled="item._disabled"
               :size="size"
-              v-decorator="[item.dataIndex, { valuePropName: 'checked',initialValue: Boolean(decRow[item.dataIndex])}]"
             />
             <!-- radio -->
             <a-radio-group
-              v-else-if="item.formOptions.el=='radio'"
+              v-else-if="item.formOptions.el == 'radio'"
+              v-model:value="model[item.dataIndex]"
               :disabled="item._disabled"
-              :size="size"
-              v-decorator="[item.dataIndex,{initialValue: decRow[item.dataIndex]}]"
               :options="item.formOptions.options"
+              :size="size"
             />
             <!-- checkbox -->
-            <template v-else-if="item.formOptions.el=='checkbox'">
+            <template v-else-if="item.formOptions.el == 'checkbox'">
               <a-checkbox-group
+                v-model:value="model[item.dataIndex]"
                 :disabled="item._disabled"
-                :size="size"
-                v-decorator="[item.dataIndex,{initialValue: decRow[item.dataIndex]}]"
                 :options="item.formOptions.options"
+                :size="size"
               />
             </template>
             <!-- range-picker -->
-            <template
-              v-else-if="item.formOptions.el=='datepicker' && item.formOptions.type=='range'"
-            >
-              <!-- moment(decRow[item.dataIndex]&&decRow[item.dataIndex][0]?decRow[item.dataIndex][0]:undefined),moment(decRow[item.dataIndex]&&decRow[item.dataIndex][1]?decRow[item.dataIndex][1]:undefined) -->
+            <template v-else-if="item.formOptions.el == 'datepicker' && item.formOptions.type == 'range'">
               <a-range-picker
-                style="width:100%"
+                v-model:value="model[item.dataIndex]"
                 :format="item.formOptions.format"
-                v-decorator="[item.dataIndex,{rules: item.formOptions.rules,initialValue: []}]"
+                style="width:100%"
               />
             </template>
             <!-- datepicker -->
             <a-date-picker
-              v-else-if="item.formOptions.el=='datepicker'"
-              style="width:100%"
+              v-else-if="item.formOptions.el == 'datepicker'"
+              v-model:value="model[item.dataIndex]"
               :disabled="item._disabled"
-              :size="size"
               :format="item.formOptions.format"
-              v-decorator="[item.dataIndex, {rules: item.formOptions.rules,initialValue: moment(decRow[item.dataIndex])}]"
+              :size="size"
+              style="width:100%"
             />
             <!-- rate -->
             <a-rate
-              v-else-if="item.formOptions.el=='rate'"
+              v-else-if="item.formOptions.el == 'rate'"
+              v-model:value="model[item.dataIndex]"
               allow-half
-              v-decorator="[item.dataIndex,, {initialValue: decRow[item.dataIndex]}]"
             />
             <!-- textarea -->
             <a-textarea
-              v-else-if="item.formOptions.el=='textarea'"
-              v-decorator="[item.dataIndex,, {initialValue: decRow[item.dataIndex]}]"
+              v-else-if="item.formOptions.el == 'textarea'"
+              v-model:value="model[item.dataIndex]"
               :rows="3"
             />
             <!-- slider -->
             <a-slider
-              v-else-if="item.formOptions.el=='slider'"
-              v-decorator="[item.dataIndex,, {initialValue: decRow[item.dataIndex]}]"
+              v-else-if="item.formOptions.el == 'slider'"
+              v-model:value="model[item.dataIndex]"
               :marks="item.formOptions.values"
             />
             <!-- tree -->
-            <template v-else-if="item.formOptions.el=='tree'">
+            <template v-else-if="item.formOptions.el == 'tree'">
               <v-crud-tree
-                v-decorator="[item.dataIndex,{rules: item.formOptions.rules}]"
+                v-model:value="model[item.dataIndex]"
                 :field="item.dataIndex"
                 :initial-value="decRow[item.dataIndex]"
                 :tree-data="item.formOptions.values"
@@ -125,219 +122,156 @@
   </div>
 </template>
 
-<script>
-import VCrudTree from './CrudTree'
-import * as deepmerge from 'deepmerge'
-// import uuid from 'uuid'
+<script lang="ts" setup>
+import {computed, reactive, ref, watch} from 'vue'
+import deepmerge from 'deepmerge'
 import moment from 'moment'
-export default {
-  name: 'VCrudForm',
-  components: {
-    VCrudTree
-  },
-  props: {
-    sourceColumns: {
-      type: Array,
-      default: () => {
-        return []
-      }
-    },
-    asyncCols: {
-      type: Array,
-      default: () => {
-        return []
-      }
-    },
-    // 从表格传进来的当前行的数据
-    row: Object,
-    // 新增和修改时的初始行数据
-    asyncRow: {
-      type: Object,
-      default: () => {
-        return {}
-      }
-    },
-    value: Boolean,
-    title: String,
-    icon: {
-      type: String,
-      default: 'form'
-    },
-    isEdit: Boolean,
-    labelCol: {
-      type: [Number, String],
-      default: 5
-    },
-    wrapperCol: {
-      type: [Number, String],
-      default: 18
-    },
-    // 表单的尺寸
-    size: {
-      type: String,
-      // default: 'default'
-      default: 'large'
-    }
-  },
-  data () {
-    return {
-      formAction: this.$form.createForm(this),
-      tempCols: this.sourceColumns,
-      // 用于改造row数据
-      decRow: this.row,
-      moment
-    }
-  },
-  watch: {
-    asyncRow: {
-      handler (val) {
-        // 合并异步的row数据 并设置新的默认值
 
-        this.decRow = { ...this.row, ...val }
-      },
-      deep: true,
-      immediate: true
-    },
-    row: {
-      handler (val) {
-        this.decRow = { ...this.asyncRow, ...val }
-      },
-      deep: true,
-      immediate: true
-    },
-    decRow: {
-      handler () {
-        // 这里设置默认值的时候得注意时间必须是moment对象 所以做了对应的处理
-        this.$nextTick(() => {
-          let keys = Object.keys(this.decRow || {})
-          keys.map(v => {
-            let obj = {}
-            let field = v
-            let value = this.decRow[field]
-            let cols = this.columns
-            cols.map(s => {
-              if (
-                s.dataIndex === v &&
-                s.formOptions.el === 'datepicker' &&
-                s.formOptions.type === 'range'
-              ) {
-                let start =
-                  this.decRow[field] && this.decRow[field][0]
-                    ? this.decRow[field][0]
-                    : ''
-                let end =
-                  this.decRow[field] && this.decRow[field][1]
-                    ? this.decRow[field][1]
-                    : ''
-                value = [moment(start), moment(end)]
-              } else if (
-                s.dataIndex === v &&
-                s.formOptions.el === 'datepicker'
-              ) {
-                value = moment(this.decRow[field])
-              }
-            })
-            obj[field] = value
-            this.formAction.setFieldsValue(obj)
-          })
-        })
-      },
-      deep: true,
-      immediate: true
-    },
-    columns: {
-      handler () {
-        if (this.value) {
-          this.tempCols = this.concatCols()
-        }
-      }
-    }
-  },
-  computed: {
-    /* columns () {
-      if (this.value) {
-        // this.tempCols = this.concatCols()
-        if (this.isEdit) {
-          // 编辑
-          return this.tempCols.filter(v => {
-            if (
-              !(
-                (v.formOptions.visible &&
-                  v.formOptions.visible.edit === false) ||
-                v.formOptions.visible === false
-              )
-            ) {
-              if (
-                (v.formOptions.disabled && v.formOptions.disabled === true) ||
-                (v.formOptions.disabled && v.formOptions.disabled.edit === true)
-              ) {
-                v._disabled = true
-              } else {
-                v._disabled = false
-              }
-              v._uuid = uuid()
-              return v
-            }
-          })
-        } else {
-          // 新增
-          return this.tempCols.filter(v => {
-            if (
-              !(
-                (v.formOptions.visible &&
-                  v.formOptions.visible.add === false) ||
-                v.formOptions.visible === false
-              )
-            ) {
-              if (
-                (v.formOptions.disabled && v.formOptions.disabled === true) ||
-                (v.formOptions.disabled && v.formOptions.disabled.add === true)
-              ) {
-                v._disabled = true
-              } else {
-                v._disabled = false
-              }
-              v._uuid = uuid()
-              return v
-            }
-          })
-        }
-      }
-    } */
-  },
-  methods: {
-    handleSubmit (e) {
-      e.preventDefault()
-      this.formAction.validateFields((err, values) => {
-        if (!err) {
-          this.$emit('handle-submit', values)
-          this.formAction.resetFields()
-        } else {
-          this.formAction.validateFieldsAndScroll()
-        }
-      })
-    },
-    cancel () {
-      this.$emit('input', false)
-    },
-    concatCols () {
-      // sourceColumns 异步数据与源数据合并
-      return this.sourceColumns.map(v => {
-        this.asyncCols.map(s => {
-          if (v.dataIndex === s.dataIndex) {
-            v = deepmerge(v, s)
-          }
-        })
-        return v
-      })
-    },
-    checkTree (field, checkedKeys) {
-      // 点击树的时候给表单赋值
-      var obj = {}
-      obj[field] = checkedKeys
-      this.formAction.setFieldsValue(obj)
-    }
+defineOptions({name: 'VCrudForm'})
+
+const props = withDefaults(
+  defineProps<{
+    sourceColumns?: any[]
+    asyncCols?: any[]
+    row?: Record<string, any>
+    asyncRow?: Record<string, any>
+    /**
+     * 弹层可见性。
+     * ⚠️ 迁移前是 Vue 2 的 `value` + `@input`（老式 v-model 约定），
+     * 而 Vue 3 的 `v-model` 绑定 `modelValue` / `update:modelValue`；
+     * 沿用旧名会让父组件的 `v-model` **静默失效**（弹层打不开、不报错）。
+     */
+    modelValue?: boolean
+    title?: string
+    icon?: string
+    isEdit?: boolean
+    labelCol?: number | string
+    wrapperCol?: number | string
+    size?: string
+  }>(),
+  {
+    sourceColumns: () => [],
+    asyncCols: () => [],
+    row: () => ({}),
+    asyncRow: () => ({}),
+    modelValue: false,
+    title: '',
+    icon: 'form',
+    isEdit: false,
+    labelCol: 5,
+    wrapperCol: 18,
+    size: 'large'
   }
+)
+
+const emit = defineEmits<{
+  (e: 'handle-submit', values: any): void
+  (e: 'update:modelValue', visible: boolean): void
+}>()
+
+const formRef = ref<any>(null)
+const model = reactive<Record<string, any>>({})
+const decRow = reactive<Record<string, any>>({...(props.row as any)})
+
+function concatCols(): any[] {
+  return (props.sourceColumns as any[]).map((v: any) => {
+    let item = v
+    ;(props.asyncCols as any[]).forEach((s: any) => {
+      if (v.dataIndex === s.dataIndex) {
+        item = deepmerge(v, s)
+      }
+    })
+    if (item._uuid == null) item._uuid = item.dataIndex
+    return item
+  })
+}
+
+const columns = ref<any[]>(concatCols())
+
+// 把 decRow 同步进受控表单 model，日期类字段用 moment 包成 dayjs（antdv4 DatePicker 只吃 dayjs）
+function applyModel() {
+  ;(columns.value as any[]).forEach((col: any) => {
+    const fo = col.formOptions
+    if (!fo) return
+    const field = col.dataIndex
+    let val = decRow[field]
+    if (fo.el === 'datepicker' && fo.type === 'range') {
+      const start = val && val[0] ? val[0] : ''
+      const end = val && val[1] ? val[1] : ''
+      val = start || end ? [moment(start), moment(end)] : []
+    } else if (fo.el === 'datepicker') {
+      val = val ? moment(val) : ''
+    } else if (fo.el === 'switch') {
+      val = Boolean(val)
+    }
+    model[field] = val
+  })
+}
+
+watch(
+  () => props.asyncRow,
+  (val) => {
+    Object.assign(decRow, props.row, val)
+  },
+  {deep: true, immediate: true}
+)
+watch(
+  () => props.row,
+  (val) => {
+    Object.assign(decRow, props.asyncRow, val)
+  },
+  {deep: true, immediate: true}
+)
+watch(() => decRow, applyModel, {deep: true, immediate: true})
+watch(columns, applyModel)
+// sourceColumns/asyncCols 后续变化时重新合并列（原逻辑在 columns watcher 里 concatCols）
+watch(
+  [() => props.sourceColumns, () => props.asyncCols],
+  () => {
+    columns.value = concatCols()
+  },
+  {deep: true}
+)
+
+const rules = computed<Record<string, any>>(() => {
+  const r: Record<string, any> = {}
+  ;(columns.value as any[]).forEach((c: any) => {
+    if (c.formOptions && c.formOptions.rules) r[c.dataIndex] = c.formOptions.rules
+  })
+  return r
+})
+
+// 弹层可见性：原用 visible 控制，antdv4 改为 v-model:open，并回写父级 v-model
+const visible = ref(Boolean(props.modelValue))
+watch(
+  () => props.modelValue,
+  (v) => {
+    visible.value = Boolean(v)
+  }
+)
+watch(visible, (v) => {
+  if (!v) emit('update:modelValue', false)
+})
+
+function handleSubmit(e?: Event) {
+  e?.preventDefault?.()
+  formRef.value
+    ?.validate()
+    .then(() => {
+      emit('handle-submit', {...model})
+      formRef.value?.resetFields()
+    })
+    .catch(() => {
+      // 校验未通过：原实现会滚动到首个错误项，这里略过滚动定位
+    })
+}
+
+function cancel() {
+  visible.value = false
+}
+
+function checkTree(field: string, checkedKeys: any) {
+  model[field] = checkedKeys
 }
 </script>
 

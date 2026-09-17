@@ -1,18 +1,18 @@
 <template>
   <div>
-    <a-popover  trigger="click" :getPopupContainer="(trigger)=>trigger.parentNode">
-      <template slot="content">
-          <div class="emoji-content">
-        <div v-for="(emojiGroup, category) in emojis" :key="category">
-          <h5>{{ category }}</h5>
-          <div>
-            <span
-              v-for="(emoji, emojiName) in emojiGroup"
-              :key="emojiName"
-              @click="insert(emoji)"
-              :title="emojiName"
-            >{{ emoji }}</span>
-          </div>
+    <a-popover :getPopupContainer="(trigger: HTMLElement) => trigger.parentNode as HTMLElement" trigger="click">
+      <template #content>
+        <div class="emoji-content">
+          <div v-for="(emojiGroup, category) in emojis" :key="category">
+            <h5>{{ category }}</h5>
+            <div>
+              <span
+                v-for="(emoji, emojiName) in emojiGroup"
+                :key="emojiName"
+                :title="emojiName"
+                @click="insert(emoji)"
+              >{{ emoji }}</span>
+            </div>
           </div>
         </div>
       </template>
@@ -25,27 +25,25 @@
   </div>
 </template>
 
-<script>
-import emojis from './emojis'
-export default {
-  name: 'v-emoji-picker',
-  data () {
-    return {
-      emojis: Object.freeze(emojis)
-    }
-  },
-  methods: {
-    insert (emoji) {
-      this.$emit('emoji', emoji)
-    }
-  }
+<script lang="ts" setup>
+import {ref} from 'vue'
+import emojiSource from './emojis'
+
+defineOptions({name: 'v-emoji-picker'})
+
+const emojis = ref(Object.freeze(emojiSource))
+
+const emit = defineEmits<{ (e: 'emoji', val: string): void }>()
+
+function insert(emoji: string) {
+  emit('emoji', emoji)
 }
 </script>
 
 <style lang="less" scoped>
-.emoji-content{
-    width: 400px;
-    height: 200px;
-    overflow-y: scroll;
+.emoji-content {
+  width: 400px;
+  height: 200px;
+  overflow-y: scroll;
 }
 </style>

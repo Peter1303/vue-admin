@@ -1,7 +1,7 @@
 <template>
   <div class="skeleton-wrapper">
     <div class="loading-container">
-      <div class="loading" />
+      <div class="loading"/>
       <div id="loading-text">
         <!-- 加载中... -->
       </div>
@@ -9,10 +9,8 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'Skeleton'
-}
+<script lang="ts" setup>
+defineOptions({name: 'Skeleton'})
 </script>
 
 <style>
@@ -221,9 +219,11 @@ export default {
     opacity: 0;
   }
 }
+
 .loading-container {
   position: relative;
 }
+
 .loading-container,
 .loading {
   height: 200px;
@@ -232,7 +232,6 @@ export default {
 }
 
 .loading {
-  border: 2px solid transparent;
   border-color: transparent #fff transparent #fff;
   -moz-animation: rotate-loading 1.5s linear 0s infinite normal;
   -moz-transform-origin: 50% 50%;
@@ -247,6 +246,7 @@ export default {
 .loading-container:hover .loading {
   border-color: transparent #e45635 transparent #e45635;
 }
+
 .loading-container:hover .loading,
 .loading-container .loading {
   -webkit-transition: all 0.5s ease-in-out;

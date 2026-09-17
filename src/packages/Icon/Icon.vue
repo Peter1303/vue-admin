@@ -1,31 +1,30 @@
 <template>
   <svg
-    class="icon"
-    aria-hidden="true"
     v-if="symbol"
+    aria-hidden="true"
+    class="icon"
   >
-    <use :xlink:href="'#' + name" />
+    <use :xlink:href="'#' + name"/>
   </svg>
   <i
     v-else
-    class="iconfont"
     :class="name"
+    class="iconfont"
   />
 </template>
-<script>
-export default {
-  name: 'VIcon',
-  props: {
-    name: {
-      type: String,
-      default: ''
-    },
-    symbol: {
-      type: Boolean,
-      default: false
-    }
+<script lang="ts" setup>
+defineOptions({name: 'VIcon'})
+
+const props = withDefaults(
+  defineProps<{
+    name?: string
+    symbol?: boolean
+  }>(),
+  {
+    name: '',
+    symbol: false
   }
-}
+)
 </script>
 <style lang="less">
 .icon {

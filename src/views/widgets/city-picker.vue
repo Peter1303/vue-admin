@@ -1,15 +1,11 @@
 <template>
-    <div>
-        <v-city-picker placeholder="请选择您的城市"></v-city-picker>
-    </div>
+  <div>
+    <v-city-picker placeholder="请选择您的城市"/>
+  </div>
 </template>
 
-<script>
-export default {
-
-}
+<script lang="ts" setup>
 </script>
 
 <style lang="less" scoped>
-
 </style>

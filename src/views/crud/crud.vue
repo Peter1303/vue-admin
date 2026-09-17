@@ -1,38 +1,46 @@
 <template>
   <v-card>
-      <a-alert
-      message="表单生成器"
+    <a-alert
       description="一段JSON配置自动生成表单，支持view modal drawer"
-      type="info"
+      message="表单生成器"
       showIcon
+      type="info"
     />
     <br>
-    <v-create-form :sourceData="columns"  :defaultData="defaultData">
-      <template v-slot:input3="{scope,value}">
-        <a-form-item :label="scope.title" :labelCol="{ span: 5 }"
-            :wrapperCol="{ span: 18 }">
-          <a-input placeholder="123"  ref="userNameInput"  v-decorator="[
-                scope.dataIndex,
-                {rules: scope.formOptions.rules,initialValue: defaultData[scope.dataIndex]}
-              ]">
-            <a-icon slot="prefix" type="user" />
-            <a-icon v-if="defaultData[scope.dataIndex]" slot="suffix" type="close-circle"  />
+    <v-create-form :defaultData="defaultData" :sourceData="columns">
+      <template v-slot:input3="{ scope }">
+        <a-form-item :label="scope.title" :label-col="{ span: 5 }" :wrapper-col="{ span: 18 }">
+          <!--
+            v-decorator → antdv4 受控表单。
+            注意：此处自定义列渲染在 v-create-form 的插槽里，父级表单 model 由 packages 内部管理，
+            因此用本地 state 承接受控值（与列 dataIndex 同名）。字段回写父级表单提交是 packages 层契约，
+            见下方 REVIEW(迁移) 说明。
+          -->
+          <a-input v-model:value="state[scope.dataIndex]" placeholder="123">
+            <template #prefix>
+              <a-icon type="user"/>
+            </template>
+            <template v-if="defaultData[scope.dataIndex]" #suffix>
+              <a-icon type="close-circle"/>
+            </template>
           </a-input>
         </a-form-item>
       </template>
     </v-create-form>
     <div>
-      <a-button @click="visible=true">抽屉展示</a-button>
-      <a-button @click="visible2=true">模态展示</a-button>
-      <v-create-form v-model="visible" model="drawer" :sourceData="columns"  :defaultData="defaultData"></v-create-form>
-      <v-create-form v-model="visible2" model="modal" :sourceData="columns"  :defaultData="defaultData"></v-create-form>
+      <a-button @click="visible = true">抽屉展示</a-button>
+      <a-button @click="visible2 = true">模态展示</a-button>
+      <v-create-form v-model="visible" :defaultData="defaultData" :sourceData="columns" model="drawer"></v-create-form>
+      <v-create-form v-model="visible2" :defaultData="defaultData" :sourceData="columns" model="modal"></v-create-form>
     </div>
   </v-card>
 </template>
 
-<script>
+<script lang="ts" setup>
+import {onMounted, reactive, ref} from 'vue'
+
+// input基本使用
 const columns = [
-  // input基本使用
   {
     title: '输入框',
     dataIndex: 'name',
@@ -85,8 +93,7 @@ const columns = [
     dataIndex: 'selectAsync',
     formOptions: {
       el: 'select',
-      options: [
-      ]
+      options: []
     }
   },
   {
@@ -129,9 +136,9 @@ const columns = [
     formOptions: {
       el: 'checkbox',
       options: [
-        { label: 'Apple', value: 'Apple' },
-        { label: 'Pear', value: 'Pear' },
-        { label: 'Orange', value: 'Orange' }
+        {label: 'Apple', value: 'Apple'},
+        {label: 'Pear', value: 'Pear'},
+        {label: 'Orange', value: 'Orange'}
       ]
     }
   },
@@ -223,62 +230,59 @@ const columns = [
           icon: 'smile'
         },
         children: [
-          { title: 'leaf', key: '0-0-0', slots: { icon: 'meh' } },
-          { title: 'leaf', key: '0-0-1', scopedSlots: { icon: 'custom' } }]
+          {title: 'leaf', key: '0-0-0', slots: {icon: 'meh'}},
+          {title: 'leaf', key: '0-0-1', slots: {icon: 'custom'}}]
       }]
     }
   }
 ]
-export default {
-  data () {
-    return {
-      visible: false,
-      visible2: false,
-      columns,
-      // 初始值 新增时值为空，编辑时为对应的值
-      defaultData: {
-        name: '这是一个基本输入框',
-        input2: '这是一个搜索输入框',
-        input3: '这是一个完全自定义的输入框',
-        select: '这是一个基本输入框',
-        selectAsync: '这是一个异步数据输入框',
-        address: 'New York No. 1 Lake Park',
-        radio: 'artiely',
-        switch: true,
-        checkbox: [],
-        datepicker: '2019/10/20',
-        timepicker: '23:59:59',
-        cascader: ['zhejiang', 'hangzhou', 'xihu'],
-        rate: 3,
-        textarea: '这是一个文本域',
-        slider: 30,
-        upload: [{
-          uid: '-1',
-          name: 'xxx.png',
-          status: 'done',
-          url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png'
-        }],
-        tree: []
-      }
-    }
-  },
-  mounted () {
-    // 异步的数据直接赋值
-    setTimeout(() => {
-      this.columns[4].formOptions.options = [
-        {
-          label: 'John Brown',
-          value: 'John Brown'
-        },
-        {
-          label: 'artiely',
-          value: 'artiely'
-        }
-      ]
-    }, 3000)
-  }
 
+const visible = ref(false)
+const visible2 = ref(false)
+// 初始值 新增时值为空，编辑时为对应的值
+const defaultData: Record<string, any> = {
+  name: '这是一个基本输入框',
+  input2: '这是一个搜索输入框',
+  input3: '这是一个完全自定义的输入框',
+  select: '这是一个基本输入框',
+  selectAsync: '这是一个异步数据输入框',
+  address: 'New York No. 1 Lake Park',
+  radio: 'artiely',
+  switch: true,
+  checkbox: [],
+  datepicker: '2019/10/20',
+  timepicker: '23:59:59',
+  cascader: ['zhejiang', 'hangzhou', 'xihu'],
+  rate: 3,
+  textarea: '这是一个文本域',
+  slider: 30,
+  upload: [{
+    uid: '-1',
+    name: 'xxx.png',
+    status: 'done',
+    url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png'
+  }],
+  tree: []
 }
+
+// 受控表单本地值（承接自定义列 input3 的 v-model:value）
+const state = reactive<Record<string, any>>({...defaultData})
+
+onMounted(() => {
+  // 异步的数据直接赋值
+  setTimeout(() => {
+    columns[4].formOptions.options = [
+      {
+        label: 'John Brown',
+        value: 'John Brown'
+      },
+      {
+        label: 'artiely',
+        value: 'artiely'
+      }
+    ]
+  }, 3000)
+})
 </script>
 
 <style>

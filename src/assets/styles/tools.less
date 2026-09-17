@@ -5,12 +5,14 @@
   -webkit-line-clamp: 2;
   overflow: hidden;
 }
+
 // 文字超出一行隐藏
 .textover1 {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
 // 清浮动
 .clearfix {
   &:after {
@@ -21,21 +23,27 @@
     clear: both;
   }
 }
+
 .fl {
   float: left;
 }
+
 .fr {
   float: right;
 }
-.select-none{
+
+.select-none {
   user-select: none;
 }
-.select-none *{
+
+.select-none * {
   user-select: none;
 }
+
 // TIP: 扩大点击范围 (使用时注意伪类冲突)
 .tap-area {
   position: relative;
+
   &::before {
     content: '';
     position: absolute;
@@ -45,12 +53,14 @@
     bottom: -10px;
   }
 }
+
 // 强制换行
 .break-word {
   word-break: break-all; /* 支持IE和chrome，FF不支持*/
   word-wrap: break-word; /* 以上三个浏览器均支持 */
 }
-td{
+
+td {
   .break-word()
 }
 

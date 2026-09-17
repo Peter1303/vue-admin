@@ -2,15 +2,10 @@
   <exception-page type="404"/>
 </template>
 
-<script>
-import ExceptionPage from './ExceptionPage'
+<script lang="ts" setup>
+import ExceptionPage from './ExceptionPage.vue'
 
-export default {
-  name: 'e404',
-  components: {
-    ExceptionPage
-  }
-}
+defineOptions({name: 'e404'})
 </script>
 
 <style scoped>

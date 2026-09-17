@@ -2,40 +2,42 @@
   <div class="artiely-action-bar">
     <slot></slot>
     <div class="action-search"></div>
-    <div class="action-action"><a-button type="primary" class="action-btn" >新增</a-button></div>
+    <div class="action-action">
+      <a-button class="action-btn" type="primary">新增</a-button>
+    </div>
     <div class="action-default">
       <a-tooltip>
-        <template slot="title">设置</template>
+        <template #title>设置</template>
         <div class="action-icon">
           <v-icon name="icon-decoration_fill"></v-icon>
         </div>
       </a-tooltip>
       <a-tooltip>
-        <template slot="title">截屏</template>
+        <template #title>截屏</template>
         <div class="action-icon">
           <v-icon name="icon-tailor"></v-icon>
         </div>
       </a-tooltip>
       <a-tooltip>
-        <template slot="title">下载</template>
+        <template #title>下载</template>
         <div class="action-icon">
           <v-icon name="icon-download-fill"></v-icon>
         </div>
       </a-tooltip>
-       <a-tooltip>
-        <template slot="title">打印</template>
+      <a-tooltip>
+        <template #title>打印</template>
         <div class="action-icon">
           <v-icon name="icon-weibiaoti526"></v-icon>
         </div>
       </a-tooltip>
-       <a-tooltip>
-        <template slot="title">导出</template>
+      <a-tooltip>
+        <template #title>导出</template>
         <div class="action-icon">
           <v-icon name="icon-send"></v-icon>
         </div>
       </a-tooltip>
-       <a-tooltip>
-        <template slot="title">导入</template>
+      <a-tooltip>
+        <template #title>导入</template>
         <div class="action-icon">
           <v-icon name="icon-inport"></v-icon>
         </div>
@@ -44,17 +46,17 @@
   </div>
 </template>
 
-<script>
-export default {}
+<script lang="ts" setup>
 </script>
 
 <style lang="less" scoped>
 .artiely-action-bar {
   height: 50px;
-  padding-left:10px;
+  padding-left: 10px;
   // background: #fff;
   width: 100%;
   display: flex;
+
   .action-search {
     width: 200px;
     height: 30px;
@@ -62,15 +64,18 @@ export default {}
     border-radius: 4px;
     margin: 10px;
   }
+
   .action-action {
     flex: 1;
     margin: 9px;
     display: flex;
   }
+
   .action-default {
     margin: 5px;
     display: flex;
   }
+
   .action-icon {
     height: 30px;
     width: 30px;
@@ -81,14 +86,17 @@ export default {}
     cursor: pointer;
     user-select: none;
     border-radius: 4px;
-    &:hover{
+
+    &:hover {
       color: #fff;
       background: #1DA57A;
-      .iconfont{
+
+      .iconfont {
         color: #fff;
       }
     }
-    .iconfont{
+
+    .iconfont {
       color: #959cb6
     }
   }

@@ -1,20 +1,21 @@
 <template>
-  <div class="artiely-scroll-top" >
+  <div class="artiely-scroll-top">
     <a-back-top>
-      <div class="ant-back-top-inner"><v-icon name="icon-packup"></v-icon></div>
+      <div class="ant-back-top-inner">
+        <v-icon name="icon-packup"></v-icon>
+      </div>
     </a-back-top>
   </div>
 </template>
 
-<script>
-export default {
-}
+<script lang="ts" setup>
 </script>
 
 <style lang="less" scoped>
-.artiely-scroll-top .ant-back-top{
+.artiely-scroll-top .ant-back-top {
   bottom: 40px;
 }
+
 .artiely-scroll-top .ant-back-top-inner {
   display: block;
   justify-content: center;
@@ -31,7 +32,8 @@ export default {
   transition: all 0.3s;
   user-select: none;
   opacity: 1;
-  .iconfont{
+
+  .iconfont {
     color: #fff;
   }
 }

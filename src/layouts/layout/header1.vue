@@ -1,5 +1,5 @@
 <template>
-  <div class="layout1-header" >
+  <div class="layout1-header">
     <div class="layout1-header-inner">
       <slot></slot>
     </div>
@@ -7,22 +7,9 @@
   </div>
 </template>
 
-<script>
-import navTabs from './nav-tabs'
-import { layout } from '@layouts'
-export default {
-  components: {
-    navTabs
-  },
-  data () {
-    return {
-      layout,
-      scrollTop: 0
-    }
-  },
-  mounted () {
-  }
-}
+<script lang="ts" setup>
+import navTabs from './nav-tabs.vue'
+import {layout} from '@layouts'
 </script>
 
 <style lang="less">
@@ -31,5 +18,4 @@ export default {
   z-index: 101;
   box-shadow: 0 1px 3px rgba(0, 21, 41, 0.08);
 }
-
 </style>

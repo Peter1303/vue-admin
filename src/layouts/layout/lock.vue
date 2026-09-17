@@ -5,11 +5,11 @@
       <p class="time">{{ time }}</p>
       <div class="lock-input-wrapper">
         <input
-          type="password"
-          placeholder="输入密码解锁"
           v-model="password"
-          @keyup.enter="back"
           autocomplete="off"
+          placeholder="输入密码解锁"
+          type="password"
+          @keyup.enter="back"
         >
       </div>
       <p class="text">DIGITAL CLOCK by Artiely</p>
@@ -17,79 +17,81 @@
   </div>
 </template>
 
-<script>
+<script lang="ts" setup>
+import {h, nextTick, onMounted, ref} from 'vue'
+import {useRouter} from 'vue-router'
+import {notification} from 'ant-design-vue'
 import md5 from 'md5'
-export default {
-  data () {
-    return {
-      time: '',
-      date: '',
-      password: ''
-    }
-  },
-  mounted () {
-    this.$nextTick(() => {
-      this.render()
-      let vm = this
-      document.addEventListener('keyup', function (e) {
-        if (e.keyCode === 27) {
-          vm.back()
-        }
-      })
-    })
-  },
-  methods: {
-    back () {
-      if (md5(this.password) === this.$store.state.sys.password) {
-        this.$store.commit('sys/isLock', false)
-        this.$router.replace({ name: 'workplace' })
-      } else {
-        const key = `open${Date.now()}`
-        this.$notification.error({
-          placement: 'topRight',
-          message: '错误提示！',
-          description: '密码错误！访问被拒绝！',
-          duration: 5,
-          btn: (
-            <a-button type="primary" slot="btn" size="small">
-              忘记密码？
-            </a-button>
-          ),
-          key
-        })
-      }
-    },
-    render () {
-      let vm = this
-      var week = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
-      setInterval(updateTime, 1000)
-      updateTime()
-      function updateTime () {
-        var cd = new Date()
-        vm.time =
-          zeroPadding(cd.getHours(), 2) +
-          ':' +
-          zeroPadding(cd.getMinutes(), 2) +
-          ':' +
-          zeroPadding(cd.getSeconds(), 2)
-        vm.date =
-          zeroPadding(cd.getFullYear(), 4) +
-          '-' +
-          zeroPadding(cd.getMonth() + 1, 2) +
-          '-' +
-          zeroPadding(cd.getDate(), 2) +
-          ' ' +
-          week[cd.getDay()]
-      }
+import {useSysStore} from '@store/modules/sys'
 
-      function zeroPadding (num, digit) {
-        var zero = ''
-        for (var i = 0; i < digit; i++) {
-          zero += '0'
-        }
-        return (zero + num).slice(-digit)
+const router = useRouter()
+const sys = useSysStore()
+
+// 注意：迁移后的 sys store 只含 menu/setMenu，原 Vue2 的 password / isLock 尚未迁入，
+// 这里用宽松类型保留原始取数 / 写回行为，待 store 补齐后再收敛。
+const sysAny = sys as unknown as { password?: string; isLock: boolean }
+
+const time = ref('')
+const date = ref('')
+const password = ref('')
+
+onMounted(() => {
+  nextTick(() => {
+    render()
+    document.addEventListener('keyup', (e: KeyboardEvent) => {
+      if (e.keyCode === 27) {
+        back()
       }
+    })
+  })
+})
+
+function back() {
+  if (md5(password.value) === sysAny.password) {
+    sysAny.isLock = false
+    router.replace({name: 'workplace'})
+  } else {
+    const key = `open${Date.now()}`
+    notification.error({
+      placement: 'topRight',
+      message: '错误提示！',
+      description: '密码错误！访问被拒绝！',
+      duration: 5,
+      btn: () => h('a-button', {type: 'primary', size: 'small'}, '忘记密码？'),
+      key
+    })
+  }
+}
+
+function render() {
+  const week = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
+  setInterval(updateTime, 1000)
+  updateTime()
+
+  function updateTime() {
+    const cd = new Date()
+    time.value =
+      zeroPadding(cd.getHours(), 2) +
+      ':' +
+      zeroPadding(cd.getMinutes(), 2) +
+      ':' +
+      zeroPadding(cd.getSeconds(), 2)
+    date.value =
+      zeroPadding(cd.getFullYear(), 4) +
+      '-' +
+      zeroPadding(cd.getMonth() + 1, 2) +
+      '-' +
+      zeroPadding(cd.getDate(), 2) +
+      ' ' +
+      week[cd.getDay()]
+  }
+
+  function zeroPadding(num: number, digit: number) {
+    let zero = ''
+    for (let i = 0; i < digit; i++) {
+      zero += '0'
     }
+    return (zero + num).toString().slice(-digit)
   }
 }
 </script>
@@ -103,12 +105,14 @@ export default {
   background: radial-gradient(ellipse at center, #0a2e38 0%, #000000 70%);
   background-size: 100%;
 }
+
 .lock-input-wrapper {
   height: 60px;
   width: 200px;
   border-radius: 4px;
   border: 2px solid #0a2e38;
   margin: 0 auto;
+
   input {
     height: 100%;
     width: 100%;
@@ -122,7 +126,6 @@ export default {
 
 #clock {
   font-family: 'Share Tech Mono', monospace;
-  color: #ffffff;
   text-align: center;
   position: absolute;
   left: 50%;
@@ -132,16 +135,19 @@ export default {
   color: #daf6ff;
   text-shadow: 0 0 20px #0aafe6, 0 0 20px rgba(10, 175, 230, 0);
 }
+
 #clock .time {
   letter-spacing: 0.05em;
   font-size: 80px;
   padding: 5px 0;
   font-family: 'DINPro-Medium';
 }
+
 #clock .date {
   letter-spacing: 0.1em;
   font-size: 24px;
 }
+
 #clock .text {
   letter-spacing: 0.1em;
   font-size: 12px;

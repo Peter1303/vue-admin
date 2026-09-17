@@ -1,10 +1,10 @@
 <template>
   <div class="cell-wrapper">
-    <div class="left" v-if="title"><span>{{title}}</span></div>
+    <div v-if="title" class="left"><span>{{ title }}</span></div>
     <div class="right">
         <span>
       <v-icon v-if="link" name="icon-enter"></v-icon>
-      <a-switch v-else-if="onoff" :defaultChecked="defaultChecked" @change="change"></a-switch>
+      <a-switch v-else-if="onoff" v-model:checked="checked" @change="change"></a-switch>
       <span v-else>
         <slot name="right"></slot>
       </span>
@@ -13,26 +13,32 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'v-cell',
-  props: {
-    title: String,
-    defaultChecked: Boolean,
-    link: {
-      type: Boolean,
-      default: false
-    },
-    onoff: {
-      type: Boolean,
-      default: false
-    }
-  },
-  methods: {
-    change (val) {
-      this.$emit('change', val)
-    }
+<script lang="ts" setup>
+import {ref} from 'vue'
+
+defineOptions({name: 'v-cell'})
+
+const props = withDefaults(
+  defineProps<{
+    title?: string
+    defaultChecked?: boolean
+    link?: boolean
+    onoff?: boolean
+  }>(),
+  {
+    title: undefined,
+    defaultChecked: false,
+    link: false,
+    onoff: false
   }
+)
+
+const checked = ref(props.defaultChecked)
+
+const emit = defineEmits<{ (e: 'change', val: boolean): void }>()
+
+function change(val: boolean) {
+  emit('change', val)
 }
 </script>
 
@@ -41,6 +47,7 @@ export default {
   display: flex;
   padding: 4px 0;
   min-height: 40px;
+
   .left {
     text-align: left;
     display: flex;
@@ -49,11 +56,12 @@ export default {
     flex-direction: column;
     font-size: 14px;
   }
+
   .right {
     flex: 1;
     text-align: right;
     display: flex;
-    justify-content:center;
+    justify-content: center;
     flex-direction: column;
   }
 }

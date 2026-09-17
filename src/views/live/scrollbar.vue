@@ -1,51 +1,29 @@
-
 <template>
   <div class="scrollbar">
     <VuePerfectScrollbar
-      class="scroll-area"
       v-once
       :settings="settings"
+      class="scroll-area"
       @ps-scroll-y="scrollHandle"
     >
       <div height="720" width="1280">
-        <h1 v-for="i in 100" :key="i">{{i}}</h1>
+        <h1 v-for="i in 100" :key="i">{{ i }}</h1>
       </div>
     </VuePerfectScrollbar>
   </div>
 </template>
-<script>
-import VuePerfectScrollbar from 'vue-perfect-scrollbar'
+<script lang="ts" setup>
+import {ref} from 'vue'
 
-export default {
-  name: 'scrollbar',
-  components: { VuePerfectScrollbar },
-  data () {
-    return {
-      settings: {
-        maxScrollbarLength: 60
-      }
-    }
-  },
-  computed: {},
-  watch: {},
-  /*
-  beforeCreate
-  created
-  beforeMount
-  mounted
-  beforeUpdate
-  updated
-  activated
-  deactivated
-  beforeDestroy
-  destroyed
-  errorCaptured
-   */
-  created () {},
-  methods: {
-    scrollHandle (evt) {
-    }
-  }
+// 原 vue-perfect-scrollbar 已替换为自研 shim，并以全局名 <VuePerfectScrollbar> 注册，模板无需改动、无需 import。
+
+defineOptions({name: 'scrollbar'})
+
+const settings = ref({
+  maxScrollbarLength: 60
+})
+
+function scrollHandle(evt: any) {
 }
 </script>
 <style lang="less" scoped>

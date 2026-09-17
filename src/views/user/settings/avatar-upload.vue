@@ -1,90 +1,106 @@
 <template>
   <a-modal
-    title="修改头像"
-    :visible="visible"
-    :maskClosable="false"
-    :confirmLoading="confirmLoading"
+    v-model:open="visible"
+    :confirm-loading="confirmLoading"
+    :mask-closable="false"
     :width="800"
+    title="修改头像"
     @cancel="cancelHandel"
   >
     <a-row>
-      <a-col :xs="24" :md="12" :style="{height: '350px'}">
+      <a-col :md="12" :style="{ height: '350px' }" :xs="24">
         <vue-cropper
           ref="cropper"
-          :img="options.img"
+          :auto-crop="option.autoCrop"
+          :auto-crop-height="option.autoCropHeight"
+          :auto-crop-width="option.autoCropWidth"
+          :fixed-box="option.fixedBox"
+          :img="option.img"
           :info="true"
-          :autoCrop="options.autoCrop"
-          :autoCropWidth="options.autoCropWidth"
-          :autoCropHeight="options.autoCropHeight"
-          :fixedBox="options.fixedBox"
-          @realTime="realTime"
+          @real-time="realTime"
         ></vue-cropper>
       </a-col>
-      <a-col :xs="24" :md="12" :style="{height: '350px'}">
+      <a-col :md="12" :style="{ height: '350px' }" :xs="24">
         <div class="avatar-upload-preview">
-          <img :src="previews.url" :style="previews.img">
+          <img :src="previews.url" :style="previews.img"/>
         </div>
       </a-col>
     </a-row>
 
-    <template slot="footer">
+    <template #footer>
       <a-button key="back" @click="cancelHandel">取消</a-button>
-      <a-button key="submit" type="primary" :loading="confirmLoading" @click="okHandel">保存</a-button>
+      <a-button key="submit" :loading="confirmLoading" type="primary" @click="okHandel">
+        保存
+      </a-button>
     </template>
   </a-modal>
 </template>
-<script>
-import { VueCropper } from 'vue-cropper'
 
-export default {
-  components: {
-    VueCropper
-  },
-  data () {
-    return {
-      visible: false,
-      id: null,
-      confirmLoading: false,
+<script lang="ts" setup>
+import {reactive, ref} from 'vue'
+import {message} from 'ant-design-vue'
+// vue-cropper 1.x 是 Vue 3 版本（原来是 0.4.x / Vue 2）。
+// ⚠️ v1 必须手动引入样式，antdv1 时代是自动带的，漏了会看到裁切框错位。
+import {VueCropper} from 'vue-cropper'
+import 'vue-cropper/dist/index.css'
+import mobileImg from '@/assets/img/mobile.png'
 
-      options: {
-        img: require('../../../assets/img/mobile.png'),
-        autoCrop: true,
-        autoCropWidth: 200,
-        autoCropHeight: 200,
-        fixedBox: true
-      },
-      previews: {}
-    }
-  },
-  methods: {
-    edit (id) {
-      this.visible = true
-      this.id = id
-      /* 获取原始头像 */
-    },
-    close () {
-      this.id = null
-      this.visible = false
-    },
-    cancelHandel () {
-      this.close()
-    },
-    okHandel () {
-      const vm = this
+defineOptions({name: 'AvatarUpload'})
 
-      vm.confirmLoading = true
-      setTimeout(() => {
-        vm.confirmLoading = false
-        vm.close()
-        vm.$message.success('上传头像成功')
-      }, 2000)
-    },
+const visible = ref(false)
+const id = ref<number | null>(null)
+const confirmLoading = ref(false)
 
-    realTime (data) {
-      this.previews = data
-    }
-  }
+const option = reactive({
+  // 原 data() 里是 require('../../../assets/img/mobile.png')，
+  // Vite 下浏览器没有 require，会整页空白；改为构建期 import
+  img: mobileImg,
+  autoCrop: true,
+  autoCropWidth: 200,
+  autoCropHeight: 200,
+  fixedBox: true
+})
+
+interface PreviewData {
+  url?: string
+  img?: string
 }
+
+const previews = reactive<PreviewData>({})
+const cropper = ref<InstanceType<typeof VueCropper> | null>(null)
+void cropper
+
+// 父组件（settings/base-settings.vue）通过 ref 调 edit/close，必须显式暴露
+function edit(targetId: number) {
+  visible.value = true
+  id.value = targetId
+  // 原代码此处留空：/* 获取原始头像 */
+}
+
+function close() {
+  id.value = null
+  visible.value = false
+}
+
+function cancelHandel() {
+  close()
+}
+
+function okHandel() {
+  confirmLoading.value = true
+  setTimeout(() => {
+    confirmLoading.value = false
+    close()
+    message.success('上传头像成功')
+  }, 2000)
+}
+
+function realTime(data: unknown) {
+  Object.assign(previews, data as PreviewData)
+}
+
+// 公开方法：与 base-settings.vue 的 ref 调用保持一致
+defineExpose({edit, close})
 </script>
 
 <style lang="less" scoped>

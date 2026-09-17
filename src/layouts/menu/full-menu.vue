@@ -1,100 +1,73 @@
 <template>
   <a-drawer
-    :wrap-class-name="`my-draw-menu ${layout.menuTheme==='dark'?'dark':'light'}`"
     v-if="layout.isMobile"
-    :visible="!layout.isCollapse"
     :closable="false"
+    :open="!layout.isCollapse"
+    :width="layout.menuWidth"
+    :wrap-class-name="`my-draw-menu ${layout.menuTheme==='dark'?'dark':'light'}`"
     mask-closable
     placement="left"
-    :width="layout.menuWidth"
     @close="handleChange"
   >
-    <solo-menu logo />
-    <div
-      v-if="trigger"
-      class="menu-drawer-index-handle"
-      :style="{left:menuWidth}"
-      slot="handle"
-      @click="toggle"
-    >
-      <a-icon type="menu-fold" v-if="!layout.isCollapse" />
-      <a-icon type="menu-unfold" v-else />
-    </div>
+    <solo-menu logo/>
+    <template #handle>
+      <div
+        v-if="trigger"
+        :style="{left:menuWidth}"
+        class="menu-drawer-index-handle"
+        @click="toggle"
+      >
+        <a-icon v-if="!layout.isCollapse" type="menu-fold"/>
+        <a-icon v-else type="menu-unfold"/>
+      </div>
+    </template>
   </a-drawer>
-  <sider-menu v-else />
+  <sider-menu v-else/>
 </template>
 
-<script>
-import siderMenu from './sider-menu'
-import soloMenu from './solo-menu'
-import { layout } from '@layouts'
+<script lang="ts" setup>
+import siderMenu from './sider-menu.vue'
+import soloMenu from './solo-menu.vue'
+import {layout} from '@layouts'
 import utils from '@/common/utils'
-let { pxtorem } = utils
-export default {
-  name: 'FullMenu',
-  components: {
-    siderMenu,
-    soloMenu
-  },
-  props: {
-    // 是否展示trigger按钮
-    trigger: {
-      type: Boolean,
-      default: false
-    }
-  },
-  data () {
-    return {
-      collapsedWidth: 80,
-      visible: true,
-      layout,
-      menuWidth: pxtorem(layout.menuWidth)
-    }
-  },
-  watch: {
-    'layout.breakPoint': {
-      handler (val) {
-        switch (val) {
-          case 'lg':
-          case 'md':
-            this.collapsedWidth = this.layout.collapsedWidth
-            break
-          case 'sm':
-          case 'xs':
-            this.collapsedWidth = 0
-            break
-          default:
-            this.collapsedWidth = this.layout.collapsedWidth
-        }
-      }
-    }
-  },
-  created () {
-    // 小屏打开时折叠起菜单解决无法初始化style属性的问题，如果想打开可在mounted中设置为false
-    if (layout.isMobile) {
-      layout.isCollapse = true
-    }
-  },
-  methods: {
-    handleChange () {
-      layout.isCollapse = true
-    },
-    toggle () {
-      layout.isCollapse = !layout.isCollapse
-    }
-  },
-  mounted () {
-    // layout.isCollapse=false
-  }
+
+defineOptions({name: 'FullMenu'})
+
+const {pxtorem} = utils
+
+interface Props {
+  // 是否展示trigger按钮
+  trigger?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  trigger: false
+})
+
+const menuWidth = pxtorem(layout.menuWidth)
+
+// 小屏打开时折叠起菜单，解决无法初始化 style 属性的问题（原 created 逻辑）
+if (layout.isMobile) {
+  layout.isCollapse = true
+}
+
+function handleChange() {
+  layout.isCollapse = true
+}
+
+function toggle() {
+  layout.isCollapse = !layout.isCollapse
 }
 </script>
 
 <style lang="less">
-@import "../../assets/styles/var.less";
+@import "@/assets/styles/var.less";
+
 .menu-drawer-index-handle {
   position: absolute;
   top: 62px;
   background: @primary-color;
+  background: var(--primary-color, @primary-color);
   width: 40px;
   height: 48px;
   display: flex;
@@ -106,7 +79,8 @@ export default {
   text-align: center;
   font-size: 16px;
   border-radius: 0px 4px 4px 0px;
-  i {
+
+  .anticon {
     color: rgb(255, 255, 255);
     font-size: 20px;
   }
@@ -118,11 +92,13 @@ export default {
       padding: 0 !important;
     }
   }
+
   &.light {
     .ant-drawer-wrapper-body {
       background: @menu-background-light;
     }
   }
+
   &.dark {
     .ant-drawer-wrapper-body {
       background: @menu-background-dark;

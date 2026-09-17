@@ -1,13 +1,10 @@
-
 <template>
   <div class="index">
     index组件
   </div>
 </template>
-<script>
-export default {
-  name: 'Index'
-}
+<script lang="ts" setup>
+defineOptions({name: 'Index'})
 </script>
 <style lang="less" scoped>
 .index {

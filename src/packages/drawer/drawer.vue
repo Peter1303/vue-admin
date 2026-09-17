@@ -4,10 +4,8 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'v-drawer'
-}
+<script lang="ts" setup>
+defineOptions({name: 'v-drawer'})
 </script>
 
 <style>

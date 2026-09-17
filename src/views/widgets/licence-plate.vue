@@ -1,11 +1,10 @@
 <template>
   <div>
-      <v-licence-plate></v-licence-plate>
+    <v-licence-plate/>
   </div>
 </template>
 
-<script>
-export default {}
+<script lang="ts" setup>
 </script>
 
 <style lang="less" scoped>

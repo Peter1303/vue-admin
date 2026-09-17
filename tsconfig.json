@@ -1,0 +1,122 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": [
+      "ESNext",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "jsx": "preserve",
+    "jsxImportSource": "vue",
+    "types": [
+      "node",
+      "vite/client"
+    ],
+    /* 用户要求：strict 全开 */
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    /* 迁移期降低噪音，但不放松类型正确性 */
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": false,
+    "useUnknownInCatchVariables": false,
+    /* 工程内的 .js 已全部清除或转为 TypeScript，关掉 allowJs 作为守门：
+       若以后有 .js 混进 include，vue-tsc 会直接报错而不是静默放过 */
+    "allowJs": false,
+    /* script/**\/*.mts 之间用显式后缀互引（`./template.mts`）——
+       Node 的 CJS 解析不认 .ts 后缀，原生 TS 必须走 ESM + 写全后缀。
+       本选项只允许该写法，配合已有的 noEmit: true 使用 */
+    "allowImportingTsExtensions": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": false,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "src/*"
+      ],
+      "@layouts": [
+        "src/layouts/index.ts"
+      ],
+      "@layouts/*": [
+        "src/layouts/*"
+      ],
+      "@router": [
+        "src/router/index.ts"
+      ],
+      "@router/*": [
+        "src/router/*"
+      ],
+      "@api": [
+        "src/api/index.ts"
+      ],
+      "@api/*": [
+        "src/api/*"
+      ],
+      "@store": [
+        "src/store/index.ts"
+      ],
+      "@store/*": [
+        "src/store/*"
+      ],
+      "@utils": [
+        "src/common/utils/index.ts"
+      ],
+      "@utils/*": [
+        "src/common/utils/*"
+      ],
+      "@config": [
+        "src/config/index.ts"
+      ],
+      "@core": [
+        "src/core/index.ts"
+      ],
+      "@core/*": [
+        "src/core/*"
+      ],
+      "moment": [
+        "src/shims/moment.ts"
+      ],
+      "vue-easy-print": [
+        "src/shims/vue-easy-print.ts"
+      ],
+      "vue-cropper": [
+        "src/shims/vue-cropper.d.ts"
+      ]
+    }
+  },
+  /* 说明：
+     - server.mts 刻意不在 include 里。它是 pm2 部署入口，依赖的 express@5 不带类型声明，
+       纳入会直接在 `vue-tsc --noEmit`（即 yarn build 的第一步）上报 TS7016。
+       这与它迁移前（server.js）的地位一致；要纳入需装 @types/express。
+     - public/ 下的 particles.min.js 是运行时由 index.html 用 <script src> 加载的第三方库，
+       不进打包、也不属于 TS 工程。 */
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.d.ts",
+    "src/**/*.vue",
+    "env.d.ts",
+    "vite.config.mts",
+    "eslint.config.mts",
+    "script/**/*.mts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "public"
+  ]
+}

@@ -1,0 +1,35 @@
+// ============================================================
+// 运行时可换肤的 CSS 变量声明（全局样式，非 scoped）
+// ------------------------------------------------------------
+// 必须放在全局样式里：本文件被 assets/styles/main.less 在入口引入。
+// 如果写进 var.less，会被各组件 <style scoped> 编译成 :root[data-v-xxx]，永远匹配不到。
+// 变量由 layouts/observable/layout.ts 的 setPrimaryColor() 在运行时覆盖。
+// ============================================================
+@import './var.less';
+
+:root {
+  --primary-color: @primary-color;
+  --info-color: @info-color;
+  --success-color: @success-color;
+  --warning-color: @warning-color;
+  --error-color: @error-color;
+
+  --text-color: @text-color;
+  --text-color-secondary: @text-color-secondary;
+  --heading-color: @heading-color;
+  --disabled-color: @disabled-color;
+
+  --border-color-base: @border-color-base;
+  --border-color-split: @border-color-split;
+
+  --body-background: @body-background;
+  --component-background: @component-background;
+  --background-color-base: @background-color-base;
+  --layout-body-background: @layout-body-background;
+  --layout-sider-background: @layout-sider-background;
+
+  --border-radius-base: @border-radius-base;
+  --border-radius-sm: @border-radius-sm;
+
+  --number-color: @number-color;
+}

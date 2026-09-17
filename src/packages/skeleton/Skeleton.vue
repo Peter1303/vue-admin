@@ -8,10 +8,8 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'Skeleton'
-}
+<script lang="ts" setup>
+defineOptions({name: 'Skeleton'})
 </script>
 <style lang="less" scoped>
 .load-wrapp {

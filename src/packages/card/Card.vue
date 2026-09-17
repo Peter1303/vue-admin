@@ -1,17 +1,15 @@
 <template>
-  <a-card class="artiely-card" :bordered="false" hoverable>
+  <a-card :bordered="false" class="artiely-card" hoverable>
     <slot/>
   </a-card>
 </template>
 
-<script>
-export default {
-  name: 'v-card'
-}
+<script lang="ts" setup>
+defineOptions({name: 'v-card'})
 </script>
 
 <style>
-.artiely-card{
+.artiely-card {
   font-size: 24px
 }
 </style>

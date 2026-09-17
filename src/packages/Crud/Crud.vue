@@ -1,40 +1,23 @@
 <template>
   <div>
     <!-- table -->
-    <template>
-      <a-card
-        @click="delegateCick"
-        :bordered="false"
-      >
-        <slot
+    <a-card :bordered="false" @click="delegateCick">
+      <slot :columns="columns" :dataSource="dataSource">
+        <div class="clearfix" style="padding-bottom:8px">
+          <a-button type="primary" @click="handleAdd">新增</a-button>
+        </div>
+        <a-table
+          :bordered="false"
           :columns="columns"
-          :dataSource="dataSource"
+          :data-source="dataSource"
+          :loading="loading"
+          :pagination="false"
+          size="large"
         >
-          <div
-            style="padding-bottom:8px"
-            class="clearfix"
-          >
-            <a-button
-              type="primary"
-              @click="handleAdd"
-            >
-              新增
-            </a-button>
-          </div>
-          <a-table
-            :columns="columns"
-            :data-source="dataSource"
-            :pagination="false"
-            :loading="loading"
-            size="large"
-            :bordered="false"
-          >
-            <a
-              slot="action"
-              slot-scope="text, record, index"
-            >
+          <template #bodyCell="{ column, text, record, index }">
+            <template v-if="column.dataIndex === 'operation'">
               <span @click="handleEdit(text, record, index)">编辑</span>
-              <a-divider type="vertical" />
+              <a-divider type="vertical"/>
               <a-popconfirm
                 v-if="dataSource.length"
                 title="确定删除？"
@@ -42,158 +25,150 @@
               >
                 <span style="color:#f00">删除</span>
               </a-popconfirm>
-              <a-divider type="vertical" />
+              <a-divider type="vertical"/>
               <span @click="handleInfo(text, record, index)">详情</span>
-            </a>
-          </a-table>
-          <div
-            class="clearfix"
-            style="padding-top:8px"
-          >
-            <a-pagination
-              class="pull-right"
-              v-model="page"
-              show-size-changer
-              :total="totalCount"
-              :page-size="pageSize"
-              @showSizeChange="showSizeChange"
-              @change="pageChange"
-            />
-          </div>
-        </slot>
-      </a-card>
-    </template>
+            </template>
+          </template>
+        </a-table>
+        <div class="clearfix" style="padding-top:8px">
+          <a-pagination
+            v-model:current="page"
+            v-model:page-size="pageSize"
+            :total="totalCount"
+            class="pull-right"
+            show-size-changer
+            @change="pageChange"
+            @showSizeChange="showSizeChange"
+          />
+        </div>
+      </slot>
+    </a-card>
     <!-- form -->
     <v-crud-form
-      @handle-submit="handleSubmit"
       :async-cols="asyncCols"
-      v-model="actionVisible"
-      :source-columns="sourceColumns"
-      :label-col="labelCol"
-      :wrapper-col="wrapperCol"
-      :row="row"
       :async-row="asyncRow"
-      :title="title"
       :icon="icon"
       :is-edit="isEdit"
+      :label-col="labelCol"
+      :row="row"
+      :source-columns="sourceColumns"
+      :title="title"
+      :value="actionVisible"
+      :wrapper-col="wrapperCol"
+      @input="actionVisible = $event"
+      @handle-submit="handleSubmit"
     />
   </div>
 </template>
 
-<script>
-import VCrudForm from './CrudForm'
-export default {
-  name: 'VCrud',
-  components: {
-    VCrudForm
-  },
-  props: {
-    // 源数据 schema
-    sourceColumns: Array,
-    // 源数据
-    dataSource: Array,
-    // 加载中
-    loading: Boolean,
-    // 异步的行数据
-    asyncRow: {
-      type: Object,
-      default: () => {
-        return {}
-      }
-    },
-    // 异步的模型数据
-    asyncCols: Array,
-    labelCol: {
-      type: [Number, String],
-      default: 5
-    },
-    wrapperCol: {
-      type: [Number, String],
-      default: 18
-    },
-    // 总页码
-    totalCount: {
-      type: [Number, String],
-      default: 10
-    }
-  },
-  data () {
-    return {
-      // 模态展示
-      actionVisible: false,
-      row: {},
-      isEdit: false,
-      icon: '',
-      title: '',
-      page: 1,
-      pageSize: 10,
-      columns: this.sourceColumns
-        .filter(v => {
-          if (!v.hidden) {
-            return v
-          }
-        })
-        .concat([
-          {
-            title: '操作',
-            key: 'operation',
-            width: 200,
-            scopedSlots: { customRender: 'action' }
-          }
-        ])
-    }
-  },
-  methods: {
-    handleSubmit (values) {
-      this.$emit('handle-submit', values, this.isEdit)
-      this.actionVisible = false
-    },
-    handleEdit (text, record, index) {
-      this.row = record
-      this.title = '编辑'
-      this.icon = 'form'
-      this.actionVisible = true
-      this.isEdit = true
-      this.$emit('handle-edit', text, record, index)
-    },
-    handleAdd () {
-      this.row = {}
-      this.title = '新增'
-      this.icon = 'plus-square'
-      this.actionVisible = true
-      this.isEdit = false
-      this.$emit('handle-add')
-    },
-    handleInfo (text, record, index) {
-      this.$emit('handle-info', text, record, index)
-    },
-    handleDel (text, record, index) {
-      this.$emit('handle-delete', text, record, index)
-    },
-    pageChange (page, pageSize) {
-      this.page = page
-      this.pageSize = pageSize
-      this.$emit('handle-page', page, pageSize)
-    },
-    showSizeChange (current, size) {
-      this.page = current
-      this.pageSize = size
-      this.$emit('handle-page', current, size)
-    },
-    delegateCick (e) {
-      let index = e.target.dataset.index
-      let type = e.target.dataset.type
-      let text = this.dataSource[index]
-      let record = this.dataSource[index]
-      if (type) {
-        if (type === 'edit' && index !== undefined) {
-          this.handleEdit(text, record, index)
-        } else if (type === 'add') {
-          this.handleAdd(text, record, index)
-        } else if (type === 'delete' && index !== undefined) {
-          this.handleDel(text, record, index)
-        }
-      }
+<script lang="ts" setup>
+import {ref} from 'vue'
+
+defineOptions({name: 'VCrud'})
+
+const props = withDefaults(
+  defineProps<{
+    sourceColumns?: any[]
+    dataSource?: any[]
+    loading?: boolean
+    asyncRow?: Record<string, any>
+    asyncCols?: any[]
+    labelCol?: number | string
+    wrapperCol?: number | string
+    totalCount?: number | string
+  }>(),
+  {
+    sourceColumns: () => [],
+    dataSource: () => [],
+    loading: false,
+    asyncRow: () => ({}),
+    asyncCols: () => [],
+    labelCol: 5,
+    wrapperCol: 18,
+    totalCount: 10
+  }
+)
+
+const emit = defineEmits<{
+  (e: 'handle-submit', values: any, isEdit: boolean): void
+  (e: 'handle-edit', text: any, record: any, index: any): void
+  (e: 'handle-add'): void
+  (e: 'handle-info', text: any, record: any, index: any): void
+  (e: 'handle-delete', text: any, record: any, index: any): void
+  (e: 'handle-page', page: number, pageSize: number): void
+}>()
+
+const actionVisible = ref(false)
+const row = ref<Record<string, any>>({})
+const isEdit = ref(false)
+const icon = ref('')
+const title = ref('')
+const page = ref(1)
+const pageSize = ref(10)
+
+// 操作列：原用 customRender 具名插槽渲染，antdv4 改为 dataIndex + #bodyCell 判断
+const columns = ref<any[]>(
+  (props.sourceColumns as any[])
+    .filter((v) => !v.hidden)
+    .concat([{title: '操作', key: 'operation', dataIndex: 'operation', width: 200}])
+)
+
+function handleSubmit(values: any) {
+  emit('handle-submit', values, isEdit.value)
+  actionVisible.value = false
+}
+
+function handleEdit(text: any, record: any, index: any) {
+  row.value = record
+  title.value = '编辑'
+  icon.value = 'form'
+  actionVisible.value = true
+  isEdit.value = true
+  emit('handle-edit', text, record, index)
+}
+
+function handleAdd() {
+  row.value = {}
+  title.value = '新增'
+  icon.value = 'plus-square'
+  actionVisible.value = true
+  isEdit.value = false
+  emit('handle-add')
+}
+
+function handleInfo(text: any, record: any, index: any) {
+  emit('handle-info', text, record, index)
+}
+
+function handleDel(text: any, record: any, index: any) {
+  emit('handle-delete', text, record, index)
+}
+
+function pageChange(p: number, size: number) {
+  page.value = p
+  pageSize.value = size
+  emit('handle-page', p, size)
+}
+
+function showSizeChange(current: number, size: number) {
+  page.value = current
+  pageSize.value = size
+  emit('handle-page', current, size)
+}
+
+function delegateCick(e: MouseEvent) {
+  const target = e.target as HTMLElement
+  const index = target.dataset.index
+  const type = target.dataset.type
+  const list = props.dataSource as any[]
+  const record = index !== undefined ? list[index as any] : undefined
+  if (type) {
+    if (type === 'edit' && index !== undefined) {
+      handleEdit(record, record, index)
+    } else if (type === 'add') {
+      handleAdd()
+    } else if (type === 'delete' && index !== undefined) {
+      handleDel(record, record, index)
     }
   }
 }

@@ -1,172 +1,124 @@
 <template>
-  <span class="md-amount " :class="{numerical: !isCapital}">
+  <span :class="{numerical: !isCapital}" class="md-amount ">
     <!-- 其他 -->
-    <template
-      v-if="!isCapital"
-    >
-    <span v-if="prefix" :style="{fontSize:prefixSize+'em'}">{{prefix}}</span>
-    <span class="number">{{ formatValue | doPrecision(legalPrecision, isRoundUp) | doFormat(hasSeparator, separator) }}</span>
-    <span v-if="suffix" :style="{fontSize:suffixSize+'em'}">{{suffix}}</span>
+    <template v-if="!isCapital">
+      <span v-if="prefix" :style="{fontSize:prefixSize+'em'}">{{ prefix }}</span>
+      <span class="number">{{ normalText }}</span>
+      <span v-if="suffix" :style="{fontSize:suffixSize+'em'}">{{ suffix }}</span>
     </template>
     <!-- 大写 -->
-    <template v-else>{{ formatValue | doPrecision(4, isRoundUp) | doCapital }}</template>
+    <template v-else>{{ capitalText }}</template>
   </span>
 </template>
 
-<script>
+<script lang="ts" setup>
+import {computed, onMounted, ref, watch} from 'vue'
 import utils from '@/common/utils'
 
 import numberCapital from './number-capital'
-let { inBrowser, Animate, formatValueByGapStep } = utils
-export default {
-  name: 'v-amount',
-  props: {
-    value: {
-      type: Number,
-      default: 0
-    },
-    precision: {
-      type: Number,
-      default: 2
-    },
-    isRoundUp: {
-      type: Boolean,
-      default: true
-    },
-    hasSeparator: {
-      type: Boolean,
-      default: true
-    },
-    separator: {
-      type: String,
-      default: ''
-    },
-    isAnimated: {
-      type: Boolean,
-      default: false
-    },
-    transition: {
-      type: Boolean,
-      default: false
-    },
-    isCapital: {
-      type: Boolean,
-      default: false
-    },
-    duration: {
-      type: Number,
-      default: 1000
-    },
-    prefix: {
-      type: String,
-      default: ''
-    },
-    prefixSize: {
-      type: Number,
-      default: 1
-    },
-    suffix: {
-      type: String,
-      default: ''
-    },
-    suffixSize: {
-      type: Number,
-      default: 1
-    }
-  },
 
-  data () {
-    return {
-      formatValue: 0,
-      isMounted: false
-    }
-  },
-  filters: {
-    /**
-     * doPrecision格式化保留的小数位
-     * value 原始值
-     * precision 小数点的保留位数
-     * isRoundUp 是否四舍五入
-     */
-    doPrecision (value, precision, isRoundUp, simple) {
-      const exponentialForm = Number(`${value}e${precision}`)
-      const rounded = isRoundUp
-        ? Math.round(exponentialForm)
-        : Math.floor(exponentialForm)
-      return Number(`${rounded}e-${precision}`).toFixed(precision)
-    },
-    /**
-     * 是否加入千分符
-     */
-    doFormat (value, hasSeparator, separator) {
-      if (!hasSeparator) {
-        return value
-      }
+const {inBrowser, Animate, formatValueByGapStep} = utils
 
-      const numberParts = value.split('.')
-      const integerValue = numberParts[0]
-      const decimalValue = numberParts[1] || ''
-      const formateValue = formatValueByGapStep(
-        3,
-        integerValue,
-        separator,
-        'right',
-        0,
-        1
-      )
-      return decimalValue
-        ? `${formateValue.value}.${decimalValue}`
-        : `${formateValue.value}`
-    },
-    doCapital (value) {
-      return numberCapital(value)
-    }
-  },
+defineOptions({name: 'v-amount'})
 
-  watch: {
-    value: {
-      handler (val, oldVal) {
-        /* istanbul ignore if  */
-        if (!inBrowser && !this.isMounted) {
-          this.formatValue = val
-          return
-        }
-        if (this.isAnimated || this.transition) {
-          this.$_doAnimateDisplay(oldVal, val)
-        } else {
-          this.formatValue = val
-        }
-      },
-      immediate: true
-    }
-  },
-
-  computed: {
-    legalPrecision () {
-      return this.precision > 0 ? this.precision : 0
-    }
-  },
-
-  mounted () {
-    this.isMounted = true
-  },
-
-  methods: {
-    // MARK: private methods
-    $_doAnimateDisplay (fromValue = 0, toValue = 0) {
-      /* istanbul ignore next  */
-      const step = percent => {
-        if (percent === 1) {
-          this.formatValue = toValue
-          return
-        }
-        this.formatValue = fromValue + (toValue - fromValue) * percent
-      }
-
-      /* istanbul ignore next  */
-      const verify = id => id
-      Animate.start(step, verify, () => {}, this.duration)
-    }
+const props = withDefaults(
+  defineProps<{
+    value?: number
+    precision?: number
+    isRoundUp?: boolean
+    hasSeparator?: boolean
+    separator?: string
+    isAnimated?: boolean
+    transition?: boolean
+    isCapital?: boolean
+    duration?: number
+    prefix?: string
+    prefixSize?: number
+    suffix?: string
+    suffixSize?: number
+  }>(),
+  {
+    value: 0,
+    precision: 2,
+    isRoundUp: true,
+    hasSeparator: true,
+    separator: '',
+    isAnimated: false,
+    transition: false,
+    isCapital: false,
+    duration: 1000,
+    prefix: '',
+    prefixSize: 1,
+    suffix: '',
+    suffixSize: 1
   }
+)
+
+const formatValue = ref(props.value)
+const isMounted = ref(false)
+
+const legalPrecision = computed(() => (props.precision > 0 ? props.precision : 0))
+
+function doPrecision(value: number, precision: number, isRoundUp: boolean) {
+  const exponentialForm = Number(`${value}e${precision}`)
+  const rounded = isRoundUp ? Math.round(exponentialForm) : Math.floor(exponentialForm)
+  return Number(`${rounded}e-${precision}`).toFixed(precision)
 }
+
+function doFormat(value: string, hasSeparator: boolean, separator: string) {
+  if (!hasSeparator) {
+    return value
+  }
+  const numberParts = value.split('.')
+  const integerValue = numberParts[0]
+  const decimalValue = numberParts[1] || ''
+  const formateValue = formatValueByGapStep(3, integerValue, separator, 'right', 0, 1)
+  return decimalValue ? `${formateValue.value}.${decimalValue}` : `${formateValue.value}`
+}
+
+function doCapital(value: string) {
+  return numberCapital(value)
+}
+
+const normalText = computed(() =>
+  doFormat(doPrecision(formatValue.value, legalPrecision.value, props.isRoundUp), props.hasSeparator, props.separator)
+)
+const capitalText = computed(() => doCapital(doPrecision(formatValue.value, 4, props.isRoundUp)))
+
+watch(
+  () => props.value,
+  (val, oldVal) => {
+    /* istanbul ignore if  */
+    if (!inBrowser && !isMounted.value) {
+      formatValue.value = val
+      return
+    }
+    if (props.isAnimated || props.transition) {
+      doAnimateDisplay(oldVal ?? 0, val)
+    } else {
+      formatValue.value = val
+    }
+  },
+  {immediate: true}
+)
+
+function doAnimateDisplay(fromValue = 0, toValue = 0) {
+  /* istanbul ignore next  */
+  const step = (percent: number) => {
+    if (percent === 1) {
+      formatValue.value = toValue
+      return
+    }
+    formatValue.value = fromValue + (toValue - fromValue) * percent
+  }
+
+  /* istanbul ignore next  */
+  const verify = (id: any) => id
+  Animate.start(step, verify, () => {
+  }, props.duration)
+}
+
+onMounted(() => {
+  isMounted.value = true
+})
 </script>

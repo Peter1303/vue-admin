@@ -1,54 +1,66 @@
 <template>
-  <!-- 基本表格 -->
   <div>
+    <!-- 基本表格 -->
     <a-card>
-        <a-alert
-      message="表格生成器"
-      description="配置一段JSON即可完成支持CRUD的表格与表单，并且自动响应式"
-      type="info"
-      showIcon
-    />
-    <br>
+      <a-alert
+        description="配置一段JSON即可完成支持CRUD的表格与表单，并且自动响应式"
+        message="表格生成器"
+        showIcon
+        type="info"
+      />
+      <br>
       <v-create-table
+        :loading="loading"
         :sourceData="columns"
         :tableData="data"
-        :loading="loading"
         @handle-edit="handleEdit"
       >
-        <template v-slot:name="{row}">
-          <a-avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />
-          {{row.name}}
-        </template>
-        <template v-slot:rate="{row}">
-          <a-rate :value="row.rate" disabled />
-        </template>
-        <template v-slot:select="{row}">
-          <a-popover title="Title">
-            <template slot="content">
-              <p>{{row.select}}</p>
-              <p>{{row.select}}</p>
-            </template>
-            <a style="display:block;width:120px">更多信息点我</a>
-          </a-popover>
-        </template>
-        <template v-slot:checkbox="{row}">
-          <a-tag
-            v-for="item in row.checkbox"
-            :key="item"
-            :color="item=='Apple'?'red':'pink'"
-          >{{item}}</a-tag>
+        <!--
+          REVIEW(迁移): 原 Vue2 通过 v-slot:name/rate/select/checkbox 给 v-create-table 传按列自定义渲染，
+          依赖 packages 把列 dataIndex 转成具名插槽转发到内部 a-table。迁移后的 v-create-table
+          内部自带 #bodyCell 且未转发消费方具名插槽，该组件没有提供任何 <slot/> 出口，
+          因此以下 #bodyCell 在 packages 当前实现下不会被渲染（与旧的 v-slot 同样处于“未生效”状态）。
+          如需恢复头像/星级/悬浮自定义列，需要 packages 层转发消费方插槽，已超出本批次 views 改写范围。
+        -->
+        <template #bodyCell="{ column, record }">
+          <template v-if="column.dataIndex === 'name'">
+            <a-avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"/>
+            {{ record.name }}
+          </template>
+          <template v-else-if="column.dataIndex === 'rate'">
+            <a-rate :value="record.rate" disabled/>
+          </template>
+          <template v-else-if="column.dataIndex === 'select'">
+            <a-popover title="Title">
+              <template #content>
+                <p>{{ record.select }}</p>
+                <p>{{ record.select }}</p>
+              </template>
+              <a style="display:block;width:120px">更多信息点我</a>
+            </a-popover>
+          </template>
+          <template v-else-if="column.dataIndex === 'checkbox'">
+            <a-tag
+              v-for="item in record.checkbox"
+              :key="item"
+              :color="item == 'Apple' ? 'red' : 'pink'"
+            >{{ item }}
+            </a-tag>
+          </template>
         </template>
       </v-create-table>
     </a-card>
     <v-create-form
-      :sourceData="columns"
-      :defaultData="defaultData"
-      model="modal"
       v-model="showForm"
+      :defaultData="defaultData"
+      :sourceData="columns"
+      model="modal"
     ></v-create-form>
   </div>
 </template>
-<script>
+<script lang="ts" setup>
+import {ref} from 'vue'
+
 const columns = [
   // input基本使用
   {
@@ -61,7 +73,7 @@ const columns = [
     formOptions: {
       el: 'input'
     },
-    sorter: (a, b) => a.name - b.name
+    sorter: (a: any, b: any) => a.name - b.name
   },
   // input.search
   {
@@ -90,9 +102,9 @@ const columns = [
     formOptions: {
       el: 'checkbox',
       options: [
-        { label: 'Apple', value: 'Apple' },
-        { label: 'Pear', value: 'Pear' },
-        { label: 'Orange', value: 'Orange' }
+        {label: 'Apple', value: 'Apple'},
+        {label: 'Pear', value: 'Pear'},
+        {label: 'Orange', value: 'Orange'}
       ]
     },
     filters: [
@@ -106,7 +118,7 @@ const columns = [
       }
     ],
     filterMultiple: true,
-    filterMethod (value, row) {
+    onFilter(value: any, row: any) {
     }
   },
   // 星级
@@ -304,8 +316,8 @@ const columns = [
             icon: 'smile'
           },
           children: [
-            { title: 'leaf', key: '0-0-0', slots: { icon: 'meh' } },
-            { title: 'leaf', key: '0-0-1', scopedSlots: { icon: 'custom' } }
+            {title: 'leaf', key: '0-0-0', slots: {icon: 'meh'}},
+            {title: 'leaf', key: '0-0-1', slots: {icon: 'custom'}}
           ]
         }
       ]
@@ -313,7 +325,7 @@ const columns = [
   }
 ]
 
-const data = []
+const data: any[] = []
 for (let i = 0; i < 10; i++) {
   data.push({
     key: i,
@@ -345,21 +357,12 @@ for (let i = 0; i < 10; i++) {
   })
 }
 
-export default {
-  data () {
-    return {
-      data,
-      columns,
-      loading: false,
-      showForm: false,
-      defaultData: {}
-    }
-  },
-  methods: {
-    handleEdit (text, record) {
-      this.showForm = true
-      this.defaultData = record
-    }
-  }
+const loading = ref(false)
+const showForm = ref(false)
+const defaultData = ref<Record<string, any>>({})
+
+function handleEdit(text: any, record: any) {
+  showForm.value = true
+  defaultData.value = record
 }
 </script>

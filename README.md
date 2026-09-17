@@ -1,5 +1,7 @@
 > 此项目将随着ant-design-vue@2.0发布后进行全面重构，欢迎star!
+
 # 效果预览
+
 <img src="./docs/localhost_8082_(iPhoneX).png" style="width:50%" width="400"><img src="./docs/localhost_8082_(iPhoneX)(1).png" style="width:50%" width="400">
 
 <img src="./docs/localhost_8082_(6).png" style="width:50%" width="400"><img src="./docs/localhost_8082_(7).png" style="width:50%" width="400">
@@ -9,10 +11,9 @@
 
 <img src="./docs/localhost_8082_(iPadPro).png" style="width:50%" width="400">
 
-
 # 预览地址
-https://artiely.gitee.io/antd-admin
 
+https://artiely.gitee.io/antd-admin
 
 # 快速构建
 
@@ -37,6 +38,7 @@ pm2 deploy deploy.yml production
 ```
 
 # 快速新建页面
+
 ```bash
 npm run new
 # 请在指定的文件夹下新建页面 如： about/userInfo
@@ -48,6 +50,7 @@ npm run new
 ```
 
 # 你将了解到
+
 - [x] axios封装并支持重连、取消
 
 - [x] 响应式断点支持pc、pad及手机
@@ -78,8 +81,8 @@ npm run new
 
 ...
 
-
 #项目结构
+
 ```
 ├─doc                   // 文档目录
 │      
@@ -114,23 +117,24 @@ npm run new
 └─theme                 // 主体管理
 ...
 ```
+
 # 浏览器支持
+
 IE 9+
 Firefox（最新）
 Chrome（最新）
 Safari（最新）
 
-
-
-
-
 # 环境
+
 ```
 win10
 node v10.15.1
 vuecli v3.7.0
 ```
+
 # 依赖
+
 ```
 "vue": "^2.6.10",
 "vue-router": "^3.0.3",

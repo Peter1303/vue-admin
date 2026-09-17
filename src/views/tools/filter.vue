@@ -1,37 +1,26 @@
 <template>
   <v-card>
-
     <p>
-手机号码格式化
-<br>
-    {{tel|telFormat()}}
+      手机号码格式化
+      <br>
+      {{ telFormat(tel) }}
     </p>
     <p>
       数据脱敏<br>
-    {{tel|telFormat(true)}}
+      {{ telFormat(tel, true) }}
     </p>
     <p>
       车牌格式化
-      <br>{{'粤A00000'|carIdFormat()}}
+      <br>{{ carIdFormat('粤A00000') }}
     </p>
-
   </v-card>
 </template>
 
-<script>
-import markdown from './README.md'
+<script lang="ts" setup>
+import {ref} from 'vue'
+import {carIdFormat, telFormat} from '@/common/filter'
 
-export default {
-  data () {
-    return {
-      tel: '18999999999',
-      markdown
-    }
-  },
-  mounted () {
-
-  }
-}
+const tel = ref('18999999999')
 </script>
 
 <style>

@@ -1,37 +1,44 @@
 <template>
   <a-popover>
-    <span slot="title"  v-if="!selectType">
+    <template v-if="!selectType" #title>
       <span>
       <a-button
-        size="small"
         :type="type==1?'primary':'default'"
-        @click="type=1"
+        size="small"
         style="margin-right:20px"
+        @click="type=1"
       >复制标签</a-button>
-      <a-button size="small" :type="type==2?'primary':'default'" @click="type=2">复制属性</a-button></span>
-    </span>
-    <span slot="icon"></span>
-    <span slot="cancelText"></span>
-    <span slot="okText"></span>
-    <div class="iconbox" slot="content">
-      <v-button
-        v-for="item in data"
-        :key="item"
-        @click="handleClick(item)"
-        v-clipboard="{value:type==1?`<v-icon name='${item}' />`:item,success,error}"
-      >
-        <v-icon :name="item"></v-icon>
-      </v-button>
-    </div>
+      <a-button :type="type==2?'primary':'default'" size="small" @click="type=2">复制属性</a-button></span>
+    </template>
+    <template #icon></template>
+    <template #cancelText></template>
+    <template #okText></template>
+    <template #content>
+      <div class="iconbox">
+        <v-button
+          v-for="item in data"
+          :key="item"
+          v-clipboard="{value:type==1?`<v-icon name='${item}' />`:item,success,error}"
+          @click="handleClick(item)"
+        >
+          <v-icon :name="item"></v-icon>
+        </v-button>
+      </div>
+    </template>
     <slot>
-    <a-input placeholder="default size" :value="currVal">
-      <v-icon slot="addonBefore" :name="currVal" />
-    </a-input>
+      <a-input :value="currVal" placeholder="default size">
+        <template #addonBefore>
+          <v-icon :name="currVal"/>
+        </template>
+      </a-input>
     </slot>
   </a-popover>
 </template>
 
-<script>
+<script lang="ts" setup>
+import {computed, ref} from 'vue'
+import {message} from 'ant-design-vue'
+
 let icons = [
   'icon-inport',
   'icon-daochu',
@@ -74,47 +81,41 @@ let icons = [
   'icon-time',
   'icon-time_fill'
 ]
-export default {
-  name: 'v-iconbox',
-  props: {
-    value: {
-      type: String,
-      default: 'icon-supply'
-    },
-    selectType: {
-      type: String,
-      default: '',
-      validator (val) {
-        return ['tag', 'name', ''].indexOf(val) !== -1
-      }
-    }
-  },
-  data () {
-    return {
-      type: 1,
-      data: Object.freeze(icons)
-    }
-  },
-  computed: {
-    currVal () {
-      return this.value ? this.value : 'icon-supply'
-    }
-  },
-  methods: {
-    handleClick (val) {
-      this.$emit('input', val)
-    },
-    success () {
-      this.$message.info('已复制到剪切板')
-    },
-    error () {
-      this.$message.info('复制失败')
-    }
+
+defineOptions({name: 'v-iconbox'})
+
+const props = withDefaults(
+  defineProps<{
+    modelValue?: string
+    selectType?: string
+  }>(),
+  {
+    modelValue: 'icon-supply',
+    selectType: ''
   }
+)
+
+const type = ref(1)
+const data = ref(Object.freeze(icons))
+
+const currVal = computed(() => (props.modelValue ? props.modelValue : 'icon-supply'))
+
+const emit = defineEmits<{ (e: 'update:modelValue', val: string): void }>()
+
+function handleClick(val: string) {
+  emit('update:modelValue', val)
+}
+
+function success() {
+  message.info('已复制到剪切板')
+}
+
+function error() {
+  message.info('复制失败')
 }
 </script>
 
-<style lang="less" >
+<style lang="less">
 .iconbox {
   width: 400px;
 }

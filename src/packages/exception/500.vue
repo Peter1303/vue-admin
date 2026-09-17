@@ -2,15 +2,10 @@
   <exception-page type="500"/>
 </template>
 
-<script>
-import ExceptionPage from './ExceptionPage'
+<script lang="ts" setup>
+import ExceptionPage from './ExceptionPage.vue'
 
-export default {
-  name: 'e500',
-  components: {
-    ExceptionPage
-  }
-}
+defineOptions({name: 'e500'})
 </script>
 
 <style scoped>

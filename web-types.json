@@ -1,0 +1,341 @@
+{
+  "$schema": "https://raw.githubusercontent.com/JetBrains/web-types/master/schema/web-types.json",
+  "framework": "vue",
+  "name": "vue-admin",
+  "version": "0.1.0",
+  "description": "项目内全局注册的自研组件（src/packages/** + src/plugins/index.ts）。由 yarn gen:components 生成，勿手改。",
+  "contributions": {
+    "html": {
+      "tags": [
+        {
+          "name": "AIconFont",
+          "description": "全局注册的自研组件（src/packages/IconFont/IconFont.vue）",
+          "source": {
+            "module": "./src/packages/IconFont/IconFont.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "Exception",
+          "description": "全局注册的自研组件（src/packages/exception/ExceptionPage.vue）",
+          "source": {
+            "module": "./src/packages/exception/ExceptionPage.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "LazyRender",
+          "description": "全局注册的自研组件（src/shims/LazyRender.vue）",
+          "source": {
+            "module": "./src/shims/LazyRender.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "Skeleton",
+          "description": "全局注册的自研组件（src/packages/skeleton/Skeleton3.vue）",
+          "source": {
+            "module": "./src/packages/skeleton/Skeleton3.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "TheMask",
+          "description": "全局注册的自研组件（src/shims/TheMask.vue）",
+          "source": {
+            "module": "./src/shims/TheMask.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "VCrud",
+          "description": "全局注册的自研组件（src/packages/Crud/Crud.vue）",
+          "source": {
+            "module": "./src/packages/Crud/Crud.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "VCrudForm",
+          "description": "全局注册的自研组件（src/packages/Crud/CrudForm.vue）",
+          "source": {
+            "module": "./src/packages/Crud/CrudForm.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "VCrudTree",
+          "description": "全局注册的自研组件（src/packages/Crud/CrudTree.vue）",
+          "source": {
+            "module": "./src/packages/Crud/CrudTree.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "VIcon",
+          "description": "全局注册的自研组件（src/packages/Icon/Icon.vue）",
+          "source": {
+            "module": "./src/packages/Icon/Icon.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "VuePerfectScrollbar",
+          "description": "全局注册的自研组件（src/shims/PerfectScrollbar.vue）",
+          "source": {
+            "module": "./src/shims/PerfectScrollbar.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "a-icon",
+          "description": "全局注册的自研组件（src/shims/AIcon.vue）",
+          "source": {
+            "module": "./src/shims/AIcon.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "a-iconfont",
+          "description": "全局注册的自研组件（src/shims/AIconFont.vue）",
+          "source": {
+            "module": "./src/shims/AIconFont.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "e403",
+          "description": "全局注册的自研组件（src/packages/exception/403.vue）",
+          "source": {
+            "module": "./src/packages/exception/403.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "e404",
+          "description": "全局注册的自研组件（src/packages/exception/404.vue）",
+          "source": {
+            "module": "./src/packages/exception/404.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "e500",
+          "description": "全局注册的自研组件（src/packages/exception/500.vue）",
+          "source": {
+            "module": "./src/packages/exception/500.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "router-error",
+          "description": "全局注册的自研组件（src/packages/exception/routeError.vue）",
+          "source": {
+            "module": "./src/packages/exception/routeError.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "v-actionbar",
+          "description": "全局注册的自研组件（src/packages/actionbar/actionbar.vue）",
+          "source": {
+            "module": "./src/packages/actionbar/actionbar.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "v-amount",
+          "description": "全局注册的自研组件（src/packages/amount/Amount.vue）",
+          "source": {
+            "module": "./src/packages/amount/Amount.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "v-avatar-group",
+          "description": "全局注册的自研组件（src/packages/avatar-group/avatar-group.vue）",
+          "source": {
+            "module": "./src/packages/avatar-group/avatar-group.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "v-button",
+          "description": "全局注册的自研组件（src/packages/Button/Button.vue）",
+          "source": {
+            "module": "./src/packages/Button/Button.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "v-captcha",
+          "description": "全局注册的自研组件（src/packages/captcha/Captcha.vue）",
+          "source": {
+            "module": "./src/packages/captcha/Captcha.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "v-card",
+          "description": "全局注册的自研组件（src/packages/card/Card.vue）",
+          "source": {
+            "module": "./src/packages/card/Card.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "v-cell",
+          "description": "全局注册的自研组件（src/packages/cell/cell.vue）",
+          "source": {
+            "module": "./src/packages/cell/cell.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "v-chat",
+          "description": "全局注册的自研组件（src/packages/chat/chat.vue）",
+          "source": {
+            "module": "./src/packages/chat/chat.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "v-city-picker",
+          "description": "全局注册的自研组件（src/packages/city-picker/city-picker.vue）",
+          "source": {
+            "module": "./src/packages/city-picker/city-picker.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "v-codebox",
+          "description": "全局注册的自研组件（src/packages/codebox/Codebox.vue）",
+          "source": {
+            "module": "./src/packages/codebox/Codebox.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "v-count-to",
+          "description": "全局注册的自研组件（src/packages/countTo/CountTo.vue）",
+          "source": {
+            "module": "./src/packages/countTo/CountTo.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "v-create-form",
+          "description": "全局注册的自研组件（src/packages/creater/CreateForm.vue）",
+          "source": {
+            "module": "./src/packages/creater/CreateForm.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "v-create-form-view",
+          "description": "全局注册的自研组件（src/packages/creater/CreateFormView.vue）",
+          "source": {
+            "module": "./src/packages/creater/CreateFormView.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "v-create-table",
+          "description": "全局注册的自研组件（src/packages/creater/CreateTable.vue）",
+          "source": {
+            "module": "./src/packages/creater/CreateTable.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "v-create-table-form",
+          "description": "全局注册的自研组件（src/packages/creater/CreateTableForm.vue）",
+          "source": {
+            "module": "./src/packages/creater/CreateTableForm.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "v-date-range-picker",
+          "description": "全局注册的自研组件（src/packages/date-range-picker/date-range-picker.vue）",
+          "source": {
+            "module": "./src/packages/date-range-picker/date-range-picker.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "v-drawer",
+          "description": "全局注册的自研组件（src/packages/drawer/drawer.vue）",
+          "source": {
+            "module": "./src/packages/drawer/drawer.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "v-emoji-picker",
+          "description": "全局注册的自研组件（src/packages/emoji-picker/emoji-picker.vue）",
+          "source": {
+            "module": "./src/packages/emoji-picker/emoji-picker.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "v-filter",
+          "description": "全局注册的自研组件（src/packages/filter/filter.vue）",
+          "source": {
+            "module": "./src/packages/filter/filter.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "v-guide",
+          "description": "全局注册的自研组件（src/packages/guide/guide.vue）",
+          "source": {
+            "module": "./src/packages/guide/guide.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "v-iconbox",
+          "description": "全局注册的自研组件（src/packages/iconbox/Iconbox.vue）",
+          "source": {
+            "module": "./src/packages/iconbox/Iconbox.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "v-licence-plate",
+          "description": "全局注册的自研组件（src/packages/licence-plate/licence-plate.vue）",
+          "source": {
+            "module": "./src/packages/licence-plate/licence-plate.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "v-logo",
+          "description": "全局注册的自研组件（src/packages/logo/logo.vue）",
+          "source": {
+            "module": "./src/packages/logo/logo.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "v-overview",
+          "description": "全局注册的自研组件（src/packages/overview/overview.vue）",
+          "source": {
+            "module": "./src/packages/overview/overview.vue",
+            "symbol": "default"
+          }
+        },
+        {
+          "name": "v-pre-code",
+          "description": "全局注册的自研组件（src/packages/pre-code/pre-code.vue）",
+          "source": {
+            "module": "./src/packages/pre-code/pre-code.vue",
+            "symbol": "default"
+          }
+        }
+      ]
+    }
+  }
+}

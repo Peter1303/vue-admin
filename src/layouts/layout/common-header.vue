@@ -2,16 +2,19 @@
   <div class="fr header-right">
     <!--
       ⚠️ 移动端顶栏的空间账（实测，349px 视口 / layout1）：
-         trigger（汉堡）占 44px，右区可用 ≈ 305px；而桌面 7 个功能按钮就要 446px
-         （每个 42px = 图标 22 + 内边距 10×2），再加用户名 52px、两条竖分隔线各 17px
-         —— 全平铺需要 ~530px，是可用宽度的 1.7 倍，塞不下。
+         trigger（汉堡）占 44px，右区可用 ≈ 305px；而桌面右区实测 487.81px（1440 视口）
+         —— 8 个功能按钮各 42px（图标 22 + 内边距 10×2）+ 用户名 52px + 两条竖分隔线，
+         是可用宽度的 1.6 倍，塞不下。
 
       所以分两档渲染，**不靠魔法断点硬塞**：
-        · 桌面（≥768px）：7 个图标 + 用户名，原样平铺
+        · 桌面（≥768px）：8 个图标 + 用户名，原样平铺
         · 移动（<768px）：4 个高频功能平铺 +「更多」popover 收走其余 3 个
-          （代办事项 / 全屏 / 锁屏）；用户名文字隐藏、只留头像 —— 那 52px 换 1.5 个图标更值
+          （代办事项 / 全屏 / 锁屏），分隔线之后是主题三项（浅色 / 深色 / 自动）；
+          用户名文字隐藏、只留头像 —— 那 52px 换 1.5 个图标更值
       这样 320px→767px 全部适用，**不需要「超窄屏再压一档」那种补丁**，
-      而且 7 个功能在移动端一个都不少（原先有 6 个被 hidden-xs-only 直接藏掉、完全不可达）。
+      而且 8 个功能在移动端一个都不少（原先有 6 个被 hidden-xs-only 直接藏掉、完全不可达）。
+      主题切换按钮同样带 `hidden-xs-only`（被隐藏时宽度为 0，移动端空间账不变），
+      而那三项在「更多」里都在 —— 移动端不丢功能。
 
       ⚠️ 两个「空格坑」（踩过，会让桌面端整条右区位移）：
          ① 用户名两端的空格**必须写在 span 里面**：Vue 模板编译默认 `whitespace: 'condense'`，
@@ -43,22 +46,22 @@
     <v-button class="hidden-xs-only" tip="锁屏" @click="router.push('/lock')">
       <a-iconfont type="icon-lock"/>
     </v-button>
-    <a-dropdown placement="bottomRight" trigger="click">
+    <a-dropdown overlay-class-name="header-theme-menu" placement="bottomRight" trigger="click">
       <v-button class="hidden-xs-only" :tip="themeTip">
-        <a-icon :type="themeIcon"/>
+        <theme-icon :mode="themeMode"/>
       </v-button>
       <template #overlay>
         <a-menu :selected-keys="[layout.themeMode]" @click="handleMenuClick">
           <a-menu-item key="light">
-            <a-icon type="bulb"/>
+            <theme-icon mode="light"/>
             <span>浅色</span>
           </a-menu-item>
           <a-menu-item key="dark">
-            <a-icon type="skin"/>
+            <theme-icon mode="dark"/>
             <span>深色</span>
           </a-menu-item>
           <a-menu-item key="auto">
-            <a-icon type="desktop"/>
+            <theme-icon mode="auto"/>
             <span>自动（跟随系统）</span>
           </a-menu-item>
         </a-menu>
@@ -92,15 +95,15 @@
           </a-menu-item>
           <a-menu-divider/>
           <a-menu-item key="light">
-            <a-icon type="bulb"/>
+            <theme-icon mode="light"/>
             <span>浅色</span>
           </a-menu-item>
           <a-menu-item key="dark">
-            <a-icon type="skin"/>
+            <theme-icon mode="dark"/>
             <span>深色</span>
           </a-menu-item>
           <a-menu-item key="auto">
-            <a-icon type="desktop"/>
+            <theme-icon mode="auto"/>
             <span>自动（跟随系统）</span>
           </a-menu-item>
         </a-menu>
@@ -148,6 +151,7 @@
 import {computed, ref} from 'vue'
 import {useRouter} from 'vue-router'
 import {message} from 'ant-design-vue'
+import ThemeIcon from './theme-icon.vue'
 import {layout, resolvedTheme, setThemeMode} from '@layouts'
 import type {ThemeMode} from '@layouts'
 
@@ -166,11 +170,12 @@ const screen = ref(false)
  */
 const THEME_KEYS = ['light', 'dark', 'auto']
 
-/** 图标随模式变：深色用「皮肤」、浅色用「灯泡」、自动用「桌面」 */
-const themeIcon = computed(() => {
-  if (layout.themeMode === 'auto') return 'desktop'
-  return layout.themeMode === 'dark' ? 'skin' : 'bulb'
-})
+/**
+ * `layout.themeMode` 在 store 里是宽 `string`（`reactive({...})` 没标类型，
+ * 同类字段还有 layoutShap / menuTheme 等），而 theme-icon 的 `mode` 要收窄的 ThemeMode。
+ * 边界上收窄一次即可 —— 与 more-group.vue 里 `as ThemeMode` 的做法一致。
+ */
+const themeMode = computed(() => layout.themeMode as ThemeMode)
 
 /** 悬浮提示里带上「自动模式下当前实际生效的是深还是浅」，免得用户以为按钮没反应 */
 const themeTip = computed(() => {
@@ -285,11 +290,16 @@ function toggleScreen() {
 </style>
 
 <!--
-  「更多」popover 的浮层内容：antd 把浮层渲染到 body 下的 portal，**不在本组件的 DOM 子树里**，
+  两个浮层菜单的样式：antd 把浮层渲染到 body 下的 portal，**不在本组件的 DOM 子树里**，
   scoped 样式对它无效，所以单独写一个非 scoped 块，并用 overlay-class-name 限定的类名兜住范围。
+
+  `header-theme-menu` 与 `header-more-menu` 共用一份：同样的三项（浅色/深色/自动）
+  在移动端「更多」里是 16px，桌面下拉里默认只有 14px —— 两处不一致看着就是没对齐，
+  这里统一成 16px。图标本身由 theme-icon.vue 负责几何，字号只决定它的整体大小。
 -->
 <style lang="less">
-.header-more-menu {
+.header-more-menu,
+.header-theme-menu {
   .ant-dropdown-menu-item {
     .anticon {
       margin-right: 8px;

@@ -339,3 +339,32 @@ html[data-theme='dark'] {
     color: var(--text-color, #373d3f) !important;
   }
 }
+
+/* ============================================================
+ * @antv/g2 图表的深色适配（CSS 能管到的那一小块）
+ * ------------------------------------------------------------
+ * ⚠️ 先分清：g2 是 **canvas** 渲染 —— 坐标轴刻度、数据标签、图例文字全都画在画布里，
+ *    CSS 完全够不着它们。那些颜色的深色化不在这里做，而是给
+ *    `new G2.Chart({ theme })` 传主题对象，见 src/views/dashboard/g2-theme.ts。
+ *
+ * 这里只处理 g2 确实渲染成 DOM 的那一块：pie.vue 用 guide().html() 画在环心的
+ * 「主机 200台」。
+ *
+ * 原来这段文案把 `color:#8c8c8c;font-size:14px;...` 直接写在 guide 的 html 字符串里：
+ * 内联样式既压过普通 CSS 规则、又无法跟随主题（深色下 #8c8c8c 压在 #141414 上偏暗）。
+ * 改成类名后交给这里 —— 浅色保持改造前的取值（观感逐像素不变），深色换令牌。
+ * ============================================================ */
+.g2-pie-center {
+  color: #8c8c8c;
+  font-size: 14px;
+  text-align: center;
+  width: 10em;
+}
+
+.g2-pie-center span {
+  font-size: 20px;
+}
+
+html[data-theme='dark'] .g2-pie-center {
+  color: rgba(255, 255, 255, 0.65);
+}

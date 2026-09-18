@@ -3,12 +3,13 @@
 </template>
 
 <script lang="ts" setup>
-import {onMounted} from 'vue'
 import {v4 as uuidv4} from 'uuid'
 // 修复 @antv/component 的 tooltip crosshairs 崩溃，必须在 new G2.Chart() 之前加载
 import '@/shims/g2-tooltip-crosshairs'
 import G2 from '@antv/g2'
 import {DataSet} from '@antv/data-set'
+import {useG2Chart} from '../g2-theme'
+import type {G2ThemeOption} from '../g2-theme'
 
 defineOptions({name: 'G2PieMultiLevel'})
 
@@ -25,12 +26,12 @@ const data = [
   {value: 250, type: '大事例三', name: '子事例六'}
 ]
 
-onMounted(() => {
-  renderChart()
-})
+// 深色下 g2 的 canvas 颜色要重建才能跟随主题，挂载/重建/清理统一交给 useG2Chart
+useG2Chart(id, renderChart)
 
 // 图表绘制逻辑原样保留（G2 v3 与框架无关，不随 Vue 2/3 变化）
-function renderChart() {
+// 仅新增：① 接收主题并透传给 G2.Chart；② 返回实例供 useG2Chart 销毁重建
+function renderChart(theme: G2ThemeOption): G2.Chart {
   // 通过 DataSet 计算百分比
   const dv = new DataView()
   dv.source(data).transform({
@@ -43,7 +44,8 @@ function renderChart() {
     container: id,
     forceFit: true,
     height: 400,
-    padding: 0
+    padding: 0,
+    theme
   })
   chart.source(dv, {
     percent: {
@@ -108,6 +110,7 @@ function renderChart() {
     })
 
   chart.render()
+  return chart
 }
 </script>
 

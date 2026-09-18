@@ -3,11 +3,12 @@
 </template>
 
 <script lang="ts" setup>
-import {onMounted} from 'vue'
 import {v4 as uuidv4} from 'uuid'
 // 修复 @antv/component 的 tooltip crosshairs 崩溃，必须在 new G2.Chart() 之前加载
 import '@/shims/g2-tooltip-crosshairs'
 import G2 from '@antv/g2'
+import {useG2Chart} from '../g2-theme'
+import type {G2ThemeOption} from '../g2-theme'
 
 defineOptions({name: 'G2Pie'})
 
@@ -25,17 +26,18 @@ const data = [
   {item: '事例五', count: 9, percent: 0.09}
 ]
 
-onMounted(() => {
-  renderChart()
-})
+// 深色下 g2 的 canvas 颜色要重建才能跟随主题，挂载/重建/清理统一交给 useG2Chart
+useG2Chart(id, renderChart)
 
 // 图表绘制逻辑原样保留（G2 v3 与框架无关，不随 Vue 2/3 变化）
-function renderChart() {
+// 仅新增：① 接收主题并透传给 G2.Chart；② 返回实例供 useG2Chart 销毁重建
+function renderChart(theme: G2ThemeOption): G2.Chart {
   const chart = new G2.Chart({
     container: id,
     forceFit: true,
     height: 400,
-    animate: false
+    animate: false,
+    theme
   })
   chart.source(data, {
     percent: {
@@ -53,9 +55,11 @@ function renderChart() {
       '<li><span style="background-color:{color};" class="g2-tooltip-marker"></span>{name}: {value}</li>'
   })
   // 辅助文本
+  // ⚠️ 原来把 `color:#8c8c8c` 写在内联 style 上，深色下无法跟随主题（内联样式还压过
+  //    cover.less 的普通规则）。改为类名，配色统一由 cover.less 的 .g2-pie-center 给。
   chart.guide().html({
     position: ['50%', '50%'],
-    html: '<div style="color:#8c8c8c;font-size: 14px;text-align: center;width: 10em;">主机<br><span style="color:#8c8c8c;font-size:20px">200</span>台</div>',
+    html: '<div class="g2-pie-center">主机<br><span>200</span>台</div>',
     alignX: 'middle',
     alignY: 'middle'
   })
@@ -79,6 +83,7 @@ function renderChart() {
   // ⚠️ G2 v3 的 Geom 类型面没有声明 setSelected（运行时是存在的），
   // 因此这里显式收窄一次，避免 strict 下报「属性不存在」。
   ;(interval as unknown as { setSelected(d: unknown): void }).setSelected(data[0])
+  return chart
 }
 </script>
 

@@ -3,11 +3,12 @@
 </template>
 
 <script lang="ts" setup>
-import {onMounted} from 'vue'
 import {v4 as uuidv4} from 'uuid'
 // 修复 @antv/component 的 tooltip crosshairs 崩溃，必须在 new G2.Chart() 之前加载
 import '@/shims/g2-tooltip-crosshairs'
 import G2 from '@antv/g2'
+import {useG2Chart} from '../g2-theme'
+import type {G2ThemeOption} from '../g2-theme'
 
 defineOptions({name: 'G2Point'})
 
@@ -389,17 +390,19 @@ const data = [{
   'Population': 4115771
 }]
 
-onMounted(() => {
-  renderChart()
-})
+// 深色下 g2 的 canvas 颜色要重建才能跟随主题，挂载/重建/清理统一交给 useG2Chart
+useG2Chart(id, renderChart)
 
 // 图表绘制逻辑原样保留（G2 v3 是与框架无关的库，不随 Vue 2/3 变化）。
-// 原实现是 mounted + this.$nextTick，onMounted 时 DOM 已挂载，无需额外 nextTick。
-function renderChart() {
+// 原实现是 mounted + this.$nextTick，onMounted 时 DOM 已挂载，无需额外 nextTick
+// （现在挂载时机由 useG2Chart 统一控制）。
+// 仅新增：① 接收主题并透传给 G2.Chart；② 返回实例供 useG2Chart 销毁重建
+function renderChart(theme: G2ThemeOption): G2.Chart {
   const chart = new G2.Chart({
     container: id,
     forceFit: true,
-    height: 400
+    height: 400,
+    theme
   })
   chart.source(data)
   // 为各个字段设置别名
@@ -445,6 +448,7 @@ function renderChart() {
       stroke: (val: string) => colorMap[val]
     })
   chart.render()
+  return chart
 }
 </script>
 

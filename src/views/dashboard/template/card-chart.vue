@@ -15,6 +15,8 @@ import {v4 as uuidv4} from 'uuid'
 import '@/shims/g2-tooltip-crosshairs'
 import G2 from '@antv/g2'
 import DataSet from '@antv/data-set'
+import {useG2Chart} from '../g2-theme'
+import type {G2ThemeOption} from '../g2-theme'
 
 defineOptions({name: 'card-chart'})
 
@@ -67,10 +69,6 @@ const props = withDefaults(
 const id = `uuid${uuidv4()}`
 const chartRef = ref<HTMLDivElement | null>(null)
 
-// 原 this.chart：G2 实例不该进响应式系统（会被 Proxy 包一层，影响性能且易出怪问题），
-// 因此用普通变量承载，语义与 this.chart 一致。
-let chart: G2.Chart | null = null
-
 // 根据比例，获取两点之间的点
 function getPoint(p0: Pt, p1: Pt, ratio: number): Pt {
   return {
@@ -79,43 +77,53 @@ function getPoint(p0: Pt, p1: Pt, ratio: number): Pt {
   }
 }
 
+/*
+ * 「数据变化重画」与「主题变化重画」共用同一个入口：
+ * 深色下 g2 的 canvas 颜色是绘制期写死的，主题一变必须重建实例（见 g2-theme.ts）。
+ *
+ * ⚠️ immediate: false —— 原实现（同 chart-min-chart.vue）是「只在 data 变化时才画」，
+ *    首屏是空的属于既有行为，这里不擅自改成挂载即画。
+ * ⚠️ 重建前会先销毁旧实例并清空容器：原来的 render() 每被触发一次就往同一个容器里
+ *    再塞一张 canvas（数据多次变化会叠出多张图），顺带把这个老问题一并修掉。
+ */
+const redraw = useG2Chart(
+  id,
+  (theme) => {
+    if (props.type === 'bar') return renderChart(theme)
+    if (props.type === 'pie') return renderChartPie(theme)
+    if (props.type === 'triangle') return renderChartTriangle(theme)
+    return null
+  },
+  {immediate: false}
+)
+
 // 原 watch: { data: { handler(){ this.render() }, deep: true } }
 watch(
   () => props.data,
   () => {
-    render()
+    nextTick(() => redraw())
   },
   {deep: true}
 )
 
 // 原 mounted() {} 是空函数，未主动渲染（与 chart-min-chart.vue 一致）
 
-function render() {
-  nextTick(() => {
-    if (props.type === 'bar') {
-      renderChart()
-    } else if (props.type === 'pie') {
-      renderChartPie()
-    } else if (props.type === 'triangle') {
-      renderChartTriangle()
-    }
-  })
-}
-
 // 图表绘制逻辑原样保留（G2 v3 与框架无关，不随 Vue 2/3 变化）
-function renderChart() {
+// 仅新增：① 接收主题并透传给 G2.Chart；② 返回实例供 useG2Chart 销毁重建
+function renderChart(theme: G2ThemeOption): G2.Chart {
   // 此处数据使用了按行组织的模式，所以需要使用 DataSet 的 fold 方法对数据进行加工
   const ds = new DataSet()
   const dv = ds.createView().source(props.data)
   const transform = props.transform ?? {}
   dv.transform(transform)
 
-  chart = new G2.Chart({
+  const chart = new G2.Chart({
     container: id,
     forceFit: true,
     height: 120,
     // 运行时支持 [上下, 左右] 的 2 元数值写法，d.ts 未覆盖，故断言
-    padding: [0, 0] as unknown as G2ChartPadding
+    padding: [0, 0] as unknown as G2ChartPadding,
+    theme
   })
   chart.source(dv)
   chart
@@ -123,9 +131,10 @@ function renderChart() {
     .position(`${String(transform.key)}*${String(transform.value)}`)
     .color('name', ['#e1e1ef', '#20c997'])
   chart.render()
+  return chart
 }
 
-function renderChartPie() {
+function renderChartPie(theme: G2ThemeOption): G2.Chart {
   // 可以通过调整这个数值控制分割空白处的间距，0-1 之间的数值
   const sliceNumber = 0.01
 
@@ -153,12 +162,13 @@ function renderChartPie() {
     }
   })
 
-  chart = new G2.Chart({
+  const chart = new G2.Chart({
     container: id,
     forceFit: true,
     height: 120,
     // 4 元形式在 d.ts 的联合类型里有声明（0 和 'auto' 都满足 number|string）
-    padding: [0, 'auto', 0, 0]
+    padding: [0, 'auto', 0, 0],
+    theme
   })
   const view = chart.view({
     start: {
@@ -189,9 +199,10 @@ function renderChartPie() {
   view.intervalStack().position('value').color('type').shape('sliceShape')
 
   chart.render()
+  return chart
 }
 
-function renderChartTriangle() {
+function renderChartTriangle(theme: G2ThemeOption): G2.Chart {
   const pointRatio = 0.7 // 设置开始变成三角形的位置 0.7
 
   // 自定义 other 的图形，增加两条线
@@ -228,11 +239,12 @@ function renderChartTriangle() {
     }
   })
 
-  chart = new G2.Chart({
+  const chart = new G2.Chart({
     container: id,
     forceFit: true,
     height: 120,
-    padding: [0, 'auto', 0, 0]
+    padding: [0, 'auto', 0, 0],
+    theme
   })
   const view = chart.view({
     start: {
@@ -257,6 +269,7 @@ function renderChartTriangle() {
   view.intervalStack().position('value').color('type').shape('triangleShape')
 
   chart.render()
+  return chart
 }
 </script>
 

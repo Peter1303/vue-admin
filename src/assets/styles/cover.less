@@ -222,6 +222,42 @@
  * ⚠️ 这个菜单默认 `opacity: 0`（要点开 toolbar 才加 `.apexcharts-menu-open`），
  *    静态扫 DOM 时会因为父元素透明而被过滤掉 —— 属于「不点开就发现不了」的一类，
  *    探针里必须真的点一次工具栏。
+ *
+ * ------------------------------------------------------------
+ * 图表的**文字**同样是浅色硬编码（同一类问题，别只修浮层）
+ * ------------------------------------------------------------
+ * apexcharts 的默认文字色来自 `chart.foreColor` 的出厂值 **`#373d3f`**，
+ * 它在深色模式的卡片底（`#141414`）上对比度只有 **1.67**（WCAG 阈值 3）——
+ * /analysis 实测有 **51 个 `<text>`**（坐标轴刻度 / 数据标签 / 图表标题）
+ * 加 **13 个图例项**都落在这个色上，肉眼就是「几乎看不见的深灰」。
+ * 之所以是 51 个而不是几个：foreColor 是**整套图表的默认文字色**，一处改动就全站生效。
+ *
+ * 为什么不给每个图表配置加 `theme: {mode:'dark'}`：
+ *   ① 那会同时把调色板切到 `palette4`、tooltip 切深色 —— 系列配色整体变化，远超「修可读性」；
+ *   ② 那 6 个图表配置都是「原样保留」的历史代码（原地创建实例、不随主题重渲染），
+ *      要跟随主题还得逐个加 `updateOptions` 的响应式，风险远大于收益。
+ *   与 `.apexcharts-menu` 同一策略：CSS 覆盖，集中、可回退。
+ *
+ * ⚠️ **必须按属性值精确命中，不能整类覆盖** —— 有些图表是**故意**用系列色的：
+ *      · `column-charts.vue` 的 `xaxis.labels.style.colors = colors`（柱子色即标签色）
+ *      · `line-area.vue` 的 `legend.labels.useSeriesColors: true`
+ *    整类覆盖（例如直接写 `.apexcharts-legend-text{color:...}`）会把它们一起打掉。
+ *    而这两处「有意」的颜色恰好都**不是** `#373d3f`，所以按出厂值命中即可精确区分：
+ *      · SVG `<text>` 走的是 **fill 表现属性**（`fill="#373d3f"`）→ 属性选择器直接可用，
+ *        且 CSS 声明天然覆盖表现属性，不需要 `!important`；
+ *      · 图例 `<span>` 的颜色走的是 **内联 style**（`color: rgb(55, 61, 63)`）→
+ *        内联样式只有 `!important` 压得住，同样用属性子串匹配限定范围。
+ *
+ * ------------------------------------------------------------
+ * 图表 tooltip：与导出菜单是同一个病 —— **白底白字（对比度 1.0）**
+ * ------------------------------------------------------------
+ * 实测（/analysis，深色）：`.apexcharts-tooltip.apexcharts-theme-light` 的底是
+ * `rgba(255,255,255,.96)`、标题条是 `rgb(236,239,241)`，而它自己**没有声明 `color`** ——
+ * 于是继承了深色主题的 `--text-color`（`rgba(255,255,255,.85)`）⇒ 白底白字，
+ * 悬停图表时弹出的那一整块 **一个字都看不见**。
+ *
+ * ⚠️ 和导出菜单一样属于「静态扫 DOM 扫不到」的一类：tooltip 默认 `opacity: 0`，
+ *    必须真的让图表出数据、把指针移上去才会显形（本项目 /analysis 的图表在 dev 下能渲染）。
  * ============================================================ */
 html[data-theme='dark'] {
   .apexcharts-menu {
@@ -232,5 +268,74 @@ html[data-theme='dark'] {
 
   .apexcharts-theme-light .apexcharts-menu-item:hover {
     background: var(--hover-fill, #eee);
+  }
+
+  // 浮层就该用「浮起表面」的令牌（深色下必须比卡片更亮，层级靠亮度差表达）。
+  // 标题条嵌在同一条规则里写，避免用「换行续行」表达后代选择器（见文件顶部 less 约定）。
+  .apexcharts-tooltip.apexcharts-theme-light {
+    background: var(--popover-background, #fff);
+    border-color: var(--border-color-base, #ddd);
+    color: var(--text-color, #000);
+
+    .apexcharts-tooltip-title {
+      background: var(--background-color-light, #eceff1);
+      border-color: var(--border-color-split, #ddd);
+      color: var(--text-color, #000);
+    }
+  }
+
+  /*
+   * 坐标轴游标提示（悬停折线图时跟在十字准星后面的那个小方块）
+   * 出厂是「浅灰底 #eceff1 + 深灰描边 #90a4ae + 深灰字 #373d3f」，
+   * 深色下就是黑页面上一块发白的方块（实测 440px²，会被「亮块」扫描抓出来）。
+   * 四个方向的小箭头是**伪元素**，底色/描边要分别接上（它们不在元素本身上）。
+   */
+  .apexcharts-xaxistooltip,
+  .apexcharts-yaxistooltip {
+    background: var(--popover-background, #eceff1);
+    border-color: var(--border-color-base, #90a4ae);
+    color: var(--text-color, #373d3f);
+  }
+
+  .apexcharts-xaxistooltip-bottom:after {
+    border-bottom-color: var(--popover-background, #eceff1);
+  }
+
+  .apexcharts-xaxistooltip-bottom:before {
+    border-bottom-color: var(--border-color-base, #90a4ae);
+  }
+
+  .apexcharts-xaxistooltip-top:after {
+    border-top-color: var(--popover-background, #eceff1);
+  }
+
+  .apexcharts-xaxistooltip-top:before {
+    border-top-color: var(--border-color-base, #90a4ae);
+  }
+
+  .apexcharts-yaxistooltip-left:after {
+    border-left-color: var(--popover-background, #eceff1);
+  }
+
+  .apexcharts-yaxistooltip-left:before {
+    border-left-color: var(--border-color-base, #90a4ae);
+  }
+
+  .apexcharts-yaxistooltip-right:after {
+    border-right-color: var(--popover-background, #eceff1);
+  }
+
+  .apexcharts-yaxistooltip-right:before {
+    border-right-color: var(--border-color-base, #90a4ae);
+  }
+
+  // 坐标轴刻度 / 数据标签 / 图表标题：出厂 foreColor 写在 fill 表现属性上
+  svg text[fill='#373d3f'] {
+    fill: var(--text-color, #373d3f);
+  }
+
+  // 图例文字：出厂 foreColor 写在内联 style 上（useSeriesColors 的图表写的是系列色，不会被命中）
+  .apexcharts-legend-text[style*='color: rgb(55, 61, 63)'] {
+    color: var(--text-color, #373d3f) !important;
   }
 }
